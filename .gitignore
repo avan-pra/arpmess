@@ -1,1 +1,6 @@
+*.o
+arpmess
 .bash_history
+peda*
+.gdb_history
+.vscode

@@ -2,12 +2,16 @@ NAME = ft_malcolm
 
 CC = gcc
 
-CFLAGS =
+CFLAGS = -I$(HEAD_DIR)
+
+HEAD_DIR = ./head/
 
 SRCS = $(addprefix $(DIR_SRCS), $(SRCSFILE))
 DIR_SRCS = ./srcs/
 SRCSFILE = \
-	main.c
+	main.c \
+	argparse.c \
+	utils.c
 
 OBJ = $(SRCS:.c=.o)
 

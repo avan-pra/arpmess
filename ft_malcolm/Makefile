@@ -11,7 +11,8 @@ DIR_SRCS = ./srcs/
 SRCSFILE = \
 	main.c \
 	argparse.c \
-	utils.c
+	utils.c \
+	arpspoof.c
 
 OBJ = $(SRCS:.c=.o)
 

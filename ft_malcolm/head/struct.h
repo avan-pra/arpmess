@@ -2,6 +2,7 @@
 # define STRUCT_H
 
 # include <stdint.h>
+# include <linux/if_ether.h>
 
 /* Ethernet frame header */
 typedef struct {

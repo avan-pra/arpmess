@@ -10,21 +10,18 @@
 /* this function transform a string (IPv4 / hostname / decimal ipv4 named str) to an uint8_t[4] (named buf) */ 
 int fill_ipv4_from_string(char *str, uint8_t buf[IPV4_LEN])
 {
-	struct addrinfo hint;
+	struct addrinfo hint = { 0x0 };
 	struct addrinfo *infos = 0x0;
 	struct addrinfo *save_infos = 0x0;
 	uint32_t addr;
 	char *ptr = str;
 	char ipstr[INET_ADDRSTRLEN];
 
-	/* this part resolve the hostname (even if it's an ip */
-
-	memset(&hint, 0, sizeof(hint));
 	hint.ai_family = AF_UNSPEC;
 	hint.ai_socktype = SOCK_STREAM;
 	getaddrinfo(str, "", &hint, &infos);
 
-	/* keep a pointer to getaddrinfo return to be able to free it later on */
+	/* keep a pointer to infos to free it later on */
 	save_infos = infos;
 
 	/* loop through getaddrinfo return, stopping at an ipv4 address */
@@ -87,4 +84,18 @@ int fill_mac_from_string(char *str, uint8_t buf[ETH_ALEN])
 bad_hdw_argument:
 	BAD_HDW_ARGUMENT(str);
 	return 1;
+}
+
+int fill_arg(char **argv, attack *attacks_infos)
+{
+	if (fill_ipv4_from_string(argv[1], attacks_infos->spoofed_pa) != 0)
+		return 1;
+	if (fill_mac_from_string(argv[2], attacks_infos->spoofed_ha) != 0)
+		return 1;
+	if (fill_ipv4_from_string(argv[3], attacks_infos->target_pa) != 0)
+		return 1;
+	if (fill_mac_from_string(argv[4], attacks_infos->target_ha) != 0)
+		return 1;
+
+	return 0;
 }

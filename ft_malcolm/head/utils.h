@@ -3,8 +3,15 @@
 
 #include <stdint.h>
 #include <net/if.h>
+# include <linux/if_ether.h>
 
-int is_hbroadcast_addr(uint8_t addr[6]);
+# include "define.h"
+
+int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN]);
 int get_network_interface_name(char name[IFNAMSIZ]);
+int is_ipv4_equal(const uint8_t pa1[IPV4_LEN], const uint8_t pa2[IPV4_LEN]);
+int is_mac_equal(const uint8_t pa1[ETH_ALEN], const uint8_t pa2[ETH_ALEN]);
+void print_mac_address(const uint8_t addr[ETH_ALEN]);
+void print_ipv4_address(const uint8_t addr[IPV4_LEN]);
 
 #endif

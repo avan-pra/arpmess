@@ -75,7 +75,7 @@ int fill_mac_from_string(char *str, uint8_t buf[ETH_ALEN])
 	char check_char = 0;
 	int sres = 0x0;
 
-	sres = sscanf(str, "%2x:%2x:%2x:%2x:%2x:%2x%c", &cpy[0], &cpy[1], &cpy[2], &cpy[3], &cpy[4], &cpy[5], &check_char);
+	sres = sscanf(str, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx%c", &cpy[0], &cpy[1], &cpy[2], &cpy[3], &cpy[4], &cpy[5], &check_char);
 	if (sres != 6)
 		goto bad_hdw_argument;
 	memcpy(buf, cpy, sizeof(cpy));

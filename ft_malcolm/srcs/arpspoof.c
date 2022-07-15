@@ -36,27 +36,30 @@ err:
 int arpspoof(SOCKET iface, const attack *attacks_infos)
 {
 	unsigned char buf[4096] = { 0x0 };
-	eth eth_hdr;
-	arp arp_hdr;
+	unsigned char payload[4096] = { 0x0 };
+	eth *eth_hdr;
+	arp *arp_hdr;
 	struct sockaddr addr;
+	socklen_t addrlen;
 
 	while (1)
 	{
-		recvfrom(iface, buf, sizeof(buf), 0, &addr, NULL);
-		eth_hdr = *(eth*)&buf;
-		arp_hdr = *(arp*)&(buf[ETH_HDR_LEN]);
+		int plen = recvfrom(iface, buf, sizeof(buf), 0, &addr, &addrlen);
+		eth_hdr = (eth*)buf;
+		arp_hdr = (arp*)(buf + ETH_HLEN);
 
-		// sometrhing wrong arp_hdr.sender_pa */
-		print_ipv4_address(arp_hdr.sender_pa);
-		print_ipv4_address(attacks_infos->target_pa);
-		
-		if (is_mac_equal(eth_hdr.src_addr, attacks_infos->target_ha)
-			&& is_ipv4_equal(arp_hdr.sender_pa, attacks_infos->target_pa))
+		printf("%d\n", plen);
+
+		if (arp_hdr->operation == 0x1 /* is it a request */
+			&& is_hbroadcast_addr(eth_hdr->dest_addr)	/* is it on broadcast */
+			&& is_mac_equal(eth_hdr->src_addr, attacks_infos->target_ha) /* is the sender the one who owns the mac address we are targetting */
+			&& is_ipv4_equal(arp_hdr->sender_pa, attacks_infos->target_pa)) /* is the sender the one who owns the ipv4 address we are targetting */
 		{
-			printf("yay\n");
+			;
 		}
 
 		memset(buf, 0x0, 4096);
+		memset(payload, 0x0, 4096);
 		// return 0;
 	}
 }

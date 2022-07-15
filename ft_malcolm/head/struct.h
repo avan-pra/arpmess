@@ -18,9 +18,10 @@ typedef struct
 	uint16_t ptype; /* Protocol address space. */
 	uint8_t hlen; /* byte len of each hardware addr */
 	uint8_t plen; /* byte len of each protocol addr */
-	uint8_t sender_ha[ETH_ALEN];	/* sender hardware addr */ 
+	uint16_t operation;	/* operation type (request) */
+	uint8_t sender_ha[ETH_ALEN];	/* sender hardware addr */
 	uint8_t sender_pa[IPV4_LEN];	/* sender protocol (IPv4) addr */
-	uint8_t target_ha[ETH_ALEN];	/* target hardware addr */ 
+	uint8_t target_ha[ETH_ALEN];	/* target hardware addr */
 	uint8_t target_pa[IPV4_LEN];	/* target protocol (IPv4) addr */
 }	arp;
 

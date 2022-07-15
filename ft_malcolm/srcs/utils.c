@@ -18,6 +18,18 @@ void print_ipv4_address(const uint8_t addr[IPV4_LEN])
 	printf("%d.%d.%d.%d\n", addr[0], addr[1], addr[2], addr[3]);
 }
 
+void copy_ipv4(uint8_t dest[IPV4_LEN], const uint8_t src[IPV4_LEN])
+{
+	for (size_t i = 0; i < IPV4_LEN; ++i)
+		dest[i] = src[i];
+}
+
+void copy_mac(uint8_t dest[ETH_ALEN], const uint8_t src[ETH_ALEN])
+{
+	for (size_t i = 0; i < ETH_ALEN; ++i)
+		dest[i] = src[i];
+}
+
 int is_ipv4_equal(const uint8_t pa1[IPV4_LEN], const uint8_t pa2[IPV4_LEN])
 {
 	for (size_t i = 0; i < IPV4_LEN; ++i) {

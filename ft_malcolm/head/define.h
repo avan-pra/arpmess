@@ -3,7 +3,8 @@
 
 # define SOCKET int
 # define IPV4_LEN 4
-# define ETH_HDR_LEN sizeof(eth)
+// # define ETH_HLEN sizeof(eth)
+# define ARP_HLEN sizeof(arp)
 # define ERROR_SAMPLE "Error: "
 # define PROG_NAME "ft_malcolm"
 

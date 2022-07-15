@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <string.h>
+#include <netinet/in.h>
+#include <netpacket/packet.h>
 
 # include "define.h"
 
@@ -55,6 +57,44 @@ int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN])
 		if (addr[i] != 255)
 			return 0;	
 	}
+	return 1;
+}
+
+/* retreive IPv4 address and mac address of the requestes name interface */
+int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LEN], uint8_t mac[ETH_ALEN])
+{
+	struct ifaddrs *ifap;
+	struct ifaddrs *ifap_it;
+	size_t ipmatch = 0, macmatch = 0;
+
+	if (getifaddrs(&ifap) != 0)
+		goto err;
+
+	for (ifap_it = ifap; ifap_it != NULL; ifap_it = ifap_it->ifa_next)
+	{
+		if (strncmp(name, ifap_it->ifa_name, IF_NAMESIZE) == 0
+			&& ifap_it->ifa_addr && ifap_it->ifa_addr->sa_family == AF_INET	/* if interface has an ipv4 */
+			&& (IFF_LOOPBACK & ifap_it->ifa_flags) != IFF_LOOPBACK	/* and interface is not a loopback interface (lo) */
+			&& (IFF_UP & ifap_it->ifa_flags) == IFF_UP)	/* and interface is up */
+		{
+			*(uint32_t*)ipv4 = *(uint32_t*)&(((struct sockaddr_in*)ifap_it->ifa_addr)->sin_addr);
+			ipmatch += 1;
+		}
+		if (strncmp(name, ifap_it->ifa_name, IF_NAMESIZE) == 0
+			&& ifap_it->ifa_addr && ifap_it->ifa_addr->sa_family == AF_PACKET	/* if interface is mac */
+			&& (IFF_LOOPBACK & ifap_it->ifa_flags) != IFF_LOOPBACK	/* and interface is not a loopback interface (lo) */
+			&& (IFF_UP & ifap_it->ifa_flags) == IFF_UP)	/* and interface is up */
+		{
+			for (int i = 0; i < ETH_ALEN; ++i)
+				mac[i] = ((struct sockaddr_ll*)ifap_it->ifa_addr)->sll_addr[i];
+			macmatch += 1;
+		}
+	}
+
+	freeifaddrs(ifap);
+	if (ipmatch == 1 && macmatch == 1)
+		return 0;
+err:
 	return 1;
 }
 

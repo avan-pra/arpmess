@@ -22,7 +22,6 @@ int main(int argc, char **argv)
 {
 	SOCKET iface = 0;
 	attack attacks_infos;
-	char ifacename[IFNAMSIZ];
 
 	// if (getuid() != 0)
 	// 	{ BADUID(getuid()); return 1; }
@@ -35,11 +34,13 @@ int main(int argc, char **argv)
 		goto err;
 
 	/* get a network interface */
-	if (get_network_interface_name(ifacename) != 0)
+	if (get_network_interface_name(attacks_infos.ifacename) != 0)
+		goto err;
+	if (get_network_interface_addresses(attacks_infos.ifacename, attacks_infos.self_pa, attacks_infos.self_ha) != 0)
 		goto err;
 
 	/* get a raw socket which is bind to device ifacename */
-	if ((iface = initiate_socket_for_arp(ifacename)) == -1)
+	if ((iface = initiate_socket_for_arp(attacks_infos.ifacename)) == -1)
 		goto err;
 
 	/* start attack */

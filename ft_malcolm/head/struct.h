@@ -3,6 +3,7 @@
 
 # include <stdint.h>
 # include <linux/if_ether.h>
+# include <net/if.h>
 
 /* Ethernet frame header */
 typedef struct {
@@ -31,6 +32,9 @@ typedef struct
 	uint8_t spoofed_ha[ETH_ALEN];	/* sender hardware addr */ 
 	uint8_t target_pa[IPV4_LEN];	/* target protocol (IPv4) addr */
 	uint8_t target_ha[ETH_ALEN];	/* target hardware addr */ 
+	uint8_t self_pa[IPV4_LEN];	/* sender protocol (IPv4) addr */
+	uint8_t self_ha[ETH_ALEN];	/* sender hardware addr */
+	char ifacename[IF_NAMESIZE];
 }	attack;
 
 # include "define.h"

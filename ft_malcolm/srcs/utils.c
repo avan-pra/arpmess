@@ -95,6 +95,7 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 	if (ipmatch == 1 && macmatch == 1)
 		return 0;
 err:
+	NO_INFO_FOR_IFACE(name);
 	return 1;
 }
 
@@ -122,5 +123,6 @@ int get_network_interface_name(char name[IFNAMSIZ])
 	if (ifap_it != NULL)
 		return 0;
 err:
+	NO_IFACE_AVAILABLE();
 	return 1;
 }

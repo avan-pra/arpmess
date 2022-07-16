@@ -23,8 +23,8 @@ int main(int argc, char **argv)
 	SOCKET iface = 0;
 	attack attacks_infos;
 
-	// if (getuid() != 0)
-	// 	{ BADUID(getuid()); return 1; }
+	if (getuid() != 0)
+		{ BADUID(getuid()); return 1; }
 
 	if (argc != 5)
 		{ USAGE(); return 1; }
@@ -36,9 +36,10 @@ int main(int argc, char **argv)
 	/* get a network interface */
 	if (get_network_interface_name(attacks_infos.ifacename) != 0)
 		goto err;
+	TELLIFACE(attacks_infos.ifacename);
 	if (get_network_interface_addresses(attacks_infos.ifacename, attacks_infos.self_pa, attacks_infos.self_ha) != 0)
 		goto err;
-
+	TELLIFACEINFO(attacks_infos.ifacename, attacks_infos.self_pa, attacks_infos.self_ha);
 	/* get a raw socket which is bind to device ifacename */
 	if ((iface = initiate_socket_for_arp(attacks_infos.ifacename)) == -1)
 		goto err;
@@ -48,14 +49,12 @@ int main(int argc, char **argv)
 		goto err;
 
 	close(iface);
+
+	TELLEXITING();
 	return 0;
 
 err:
 	if (iface > 0)
 		close(iface);
-	if (errno != 0) {
-		printf("Error: %s\n", strerror(errno));
-		return 1;
-	}
 	return 1;
 }

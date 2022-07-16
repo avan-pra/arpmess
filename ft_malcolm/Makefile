@@ -2,7 +2,7 @@ NAME = ft_malcolm
 
 CC = gcc
 
-CFLAGS = -I$(HEAD_DIR)
+CFLAGS = -Wall -Wextra -Werror -I$(HEAD_DIR)
 
 HEAD_DIR = ./head/
 

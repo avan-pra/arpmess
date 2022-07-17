@@ -5,6 +5,8 @@
 int main(int argc, char **argv)
 {
 	struct arguments arguments = { 0x0 };
+	nmap_r **scan = NULL; /* hold result of the arp nmap scan */
+	int action;
 
 	argparse(argc, argv, &arguments);
 
@@ -20,12 +22,19 @@ int main(int argc, char **argv)
 	if (get_network_interface_addresses(arguments.ifacename, arguments.self_pa, arguments.self_pa, arguments.netmask) != 0)
 		goto err;//error no hardware addr or protocol address for specified interface
 
-	if (arguments.target_list == NULL)
-		nmapscan(arguments.gateway_pa, arguments.netmask);
+	/* the target arg should be handle around here */
+	/* arguments.target_list == NULL */
+	if (!(scan = nmapscan(&arguments))) 
+		goto err;
 	
+	action = ask_attack_type();
+
+	free_arp_scan(scan);
 	return 0;
 
 err:
+	if (scan)
+		free_arp_scan(scan);
 	ERROR_EXIT();
 	return 1;
 }

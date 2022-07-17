@@ -10,10 +10,14 @@ int argparse(int argc, char **argv, struct arguments *arguments);
 int get_gateway_ip(void);
 int get_network_interface(char ifacename[IF_NAMESIZE], uint8_t gateway_pa[IPV4_LEN]);
 int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LEN], uint8_t mac[ETH_ALEN], uint8_t netmask[ETH_ALEN]);
-int nmapscan(uint8_t gateway_pa[IPV4_LEN], uint8_t netmask[IPV4_LEN]);
+nmap_r **nmapscan(struct arguments *arguments);
+nmap_r **parse_arp_scan(FILE *fd, const struct arguments *arguments);
+void free_arp_scan(nmap_r **scan);
+
 
 /* interactive.c */
 int ask_user_for_gateway();
+int ask_attack_type();
 
 /* utils.c */
 int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN]);

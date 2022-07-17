@@ -29,6 +29,10 @@ int main(int argc, char **argv)
 	
 	action = ask_attack_type();
 
+	if (action == ACTION_ONE) {
+		int hostidx = ask_index(scan, &arguments);
+	}
+
 	free_arp_scan(scan);
 	return 0;
 

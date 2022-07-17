@@ -208,8 +208,8 @@ nmap_r **nmapscan(struct arguments *arguments)
 	);
 	TELLSCAN(arguments->gateway_pa, arguments->netmask);
 
-	// fd = popen(command, "r");
-	fd = fopen("res", "r");
+	fd = popen(command, "r");
+	// fd = fopen("res", "r");
 	pthread_create(&thread, NULL, print_nmap_running, &scan_status);
 
 	if (!(scan = parse_arp_scan(fd, arguments)))
@@ -223,8 +223,12 @@ nmap_r **nmapscan(struct arguments *arguments)
 	size_t i;
 	for (i = 0; scan[i] != NULL; ++i) {
 		if (is_ipv4_equal(scan[i]->pa, arguments->gateway_pa)) {
+			scan[i]->gateway = 1;
 			for (int j = 0; j < ETH_ALEN; ++j)
 				arguments->gateway_ha[j] = scan[i]->ha[j];
+		}
+		if (is_ipv4_equal(scan[i]->pa, arguments->self_pa)) {
+			scan[i]->self = 1;
 		}
 	}
 	arguments->scanamount = i;

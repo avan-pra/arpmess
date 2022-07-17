@@ -14,10 +14,10 @@ nmap_r **nmapscan(struct arguments *arguments);
 nmap_r **parse_arp_scan(FILE *fd, const struct arguments *arguments);
 void free_arp_scan(nmap_r **scan);
 
-
 /* interactive.c */
 int ask_user_for_gateway();
 int ask_attack_type();
+int ask_index(nmap_r **scan, const struct arguments *arguments);
 
 /* utils.c */
 int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN]);

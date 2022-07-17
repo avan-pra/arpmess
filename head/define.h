@@ -32,6 +32,9 @@
 # define SAMPLE_INFO "["ANSI_COLOR_BRIGHT_BLUE"*"ANSI_COLOR_RESET"] "
 # define SAMPLE_NEW "["ANSI_COLOR_BRIGHT_GREEN"+"ANSI_COLOR_RESET"] "
 # define SAMPLE_ERROR "["ANSI_COLOR_BRIGHT_RED"-"ANSI_COLOR_RESET"] "
+# define ACTION_ONE '1'
+# define ACTION_SOME '2'
+# define ACTION_ALL '3'
 
 #ifndef SO_BINDTODEVICE
 # define SO_BINDTODEVICE 0x19	/* for vscode */
@@ -54,6 +57,9 @@
 # define ERROR_NO_INFO_FOR_IFACE(IFACENAME) { fprintf(stderr, "%sCould not find ipv4 and harware address of interface %s\n", SAMPLE_ERROR, IFACENAME); }
 # define ERROR_MALLOC() { fprintf(stderr, "%smalloc() returned NULL\n", SAMPLE_ERROR); }
 # define ERROR_NMAP(LINE) { fprintf(stderr, "%s The nmap scan returned an incomprehensible line: |%s|", SAMPLE_ERROR, LINE); }
+# define ERROR_UNRECOGNIZED_CHAR_ASK(CHAR) { fprintf(stderr, "%sUnrecognized selected choice: %c\n", SAMPLE_ERROR, CHAR); }
+# define ERROR_UNRECOGNIZED_UINTEGER_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %u\n", SAMPLE_ERROR, INT); }
+# define ERROR_CANT_SELECT_SELF_OR_GATEWAY() { fprintf(stderr, "%sYou can't poison neither the gateway nor yourself\n", SAMPLE_ERROR); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\
@@ -83,7 +89,8 @@
 \n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\
 \n\
-"PROMPT, SAMPLE_INFO); }
+"PROMPT, SAMPLE_INFO);\
+}
 
 # include "struct.h"
 

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "struct.h"
+#include "define.h"
 
 /*
    OPTIONS.  Field 1 in ARGP.
@@ -50,7 +51,13 @@ int argparse(int argc, char **argv, struct arguments *arguments)
 {
 static char args_doc[] = "";
 static char doc[] = \
-"arpmess -- A kickthemout like rewrite in C";
+"arpmess -- A kickthemout like rewrite in C\
+\v\
+"IFACECOLOR"Color for interface\n\
+"IPV4COLOR"Color for ipv4\n\
+"MACCOLOR"Color for mac addresses\n\
+"NETMASKCOLOR"Color for netmask\
+"ANSI_COLOR_RESET;
 
 	static struct argp argp = { options, parse_opt, args_doc, doc };
 

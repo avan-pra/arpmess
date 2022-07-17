@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "utils.h"
 #include "struct.h"
 
@@ -6,6 +7,9 @@ int main(int argc, char **argv)
 	struct arguments arguments = { 0x0 };
 
 	argparse(argc, argv, &arguments);
+
+	if (getuid() != 0)
+	{ ERROR_UID(getuid(), argv[0]); goto err; }
 
 	/* we are getting network interface info in two rounds to */
 	/* confirm the existence of the interface specified by the user or get one

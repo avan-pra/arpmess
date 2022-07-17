@@ -30,8 +30,8 @@ fclean: clean
 
 re: fclean $(NAME)
 
-# all:
-# 	cd ft_malcolm && make && docker cp ft_malcolm workctn:/root/arpmess
+copy:
+	docker cp arpmess workctn:/root/arpmess
 
 container:
 	docker build -t arpmessimg .

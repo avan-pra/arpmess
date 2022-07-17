@@ -67,7 +67,7 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 
 	freeifaddrs(ifap);
 	if (ipmatch >= 1 && macmatch >= 1) {
-		TELLIFACEINFO(name, ipv4, mac);
+		TELLIFACEINFO(name, ipv4, netmask, mac);
 		return 0;
 	}
 err:

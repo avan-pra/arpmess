@@ -46,6 +46,8 @@ typedef struct arguments
 	int verbose;
 	char *target_list;
 	char ifacename[IF_NAMESIZE];
+	/* number of packets sent per minute */
+	int ppm;
 	unsigned int scanamount;	/* number of result in the scan */
 	uint8_t gateway_pa[IPV4_LEN];	/* gateway protocol (IPv4) addr */
 	uint8_t gateway_ha[ETH_ALEN];	/* gateway hardware addr */
@@ -59,8 +61,10 @@ typedef struct nmap_t
 	uint32_t idx;
 	uint8_t pa[IPV4_LEN];
 	uint8_t ha[ETH_ALEN];
-	uint8_t gateway; /*true or false */
-	uint8_t self; /* true or false */
+	/* is the current result the gateway ? */
+	uint8_t gateway;
+	/* is the current result us ? */
+	uint8_t self;
 	char *vendor;
 	char *vendor_extra;
 }	nmap_r;

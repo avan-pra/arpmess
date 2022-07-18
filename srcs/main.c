@@ -8,6 +8,7 @@ int main(int argc, char **argv)
 	nmap_r **scan = NULL; /* hold result of the arp nmap scan */
 	int action;
 
+	arguments.ppm = 12; /* default value of packet sent per minute */
 	argparse(argc, argv, &arguments);
 
 	if (getuid() != 0)

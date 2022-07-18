@@ -51,6 +51,8 @@
 # define TELLHANGON() { printf("%snmap scan running, hang on...\n", SAMPLE_INFO); }
 # define TELLDONESCANNING(N, NT) { printf("%sDone scanning, %d out of %d hosts are up\n", SAMPLE_INFO, N, NT); }
 # define TELLGATEWAYHA(HA) { printf("%sFound gateway hardware address: "MACCOLOR"%02x:%02x:%02x:%02x:%02x:%02x"ANSI_COLOR_RESET"\n", SAMPLE_NEW, HA[0], HA[1], HA[2], HA[3], HA[4], HA[5]); }
+# define TELLSOCKETSUCCESS(IFACENAME) { printf("%sSuccessfully binded raw socket to interface "IFACECOLOR"%s"ANSI_COLOR_RESET"\n", SAMPLE_INFO, IFACENAME); }
+# define TELLNUKINGTARGET(TARGETIP, GATEWAYIP, SELFMAC) { printf("%sNuking target "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" with arp reply packet: "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" is at "MACCOLOR"%02x:%02x:%02x:%02x:%02x:%02x"ANSI_COLOR_RESET"\n", SAMPLE_INFO, TARGETIP[0], TARGETIP[1], TARGETIP[2], TARGETIP[3], GATEWAYIP[0], GATEWAYIP[1], GATEWAYIP[2], GATEWAYIP[3], SELFMAC[0], SELFMAC[1], SELFMAC[2], SELFMAC[3], SELFMAC[4], SELFMAC[5]); }
 
 # define TELLEXITING() { printf("Exiting program...\n"); }
 

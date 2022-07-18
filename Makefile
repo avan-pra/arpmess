@@ -18,7 +18,7 @@ SRCSFILE = \
 
 OBJ = $(SRCS:.c=.o)
 
-all: $(NAME) copy
+all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
@@ -29,7 +29,7 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 
-re: fclean $(NAME) copy
+re: fclean $(NAME)
 
 vendor:
 	curl https://gitlab.com/wireshark/wireshark/-/raw/master/manuf --output manuf || wget https://gitlab.com/wireshark/wireshark/-/raw/master/manuf

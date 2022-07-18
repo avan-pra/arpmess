@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 	if (get_network_interface(arguments.ifacename, arguments.gateway_pa) != 0)
 		goto err;//error no iface found
 	/* get self ipv4, self mac addr, netmask of the network */
-	if (get_network_interface_addresses(arguments.ifacename, arguments.self_pa, arguments.self_pa, arguments.netmask) != 0)
+	if (get_network_interface_addresses(arguments.ifacename, arguments.self_pa, arguments.self_ha, arguments.netmask) != 0)
 		goto err;//error no hardware addr or protocol address for specified interface
 
 	/* the target arg should be handle around here */

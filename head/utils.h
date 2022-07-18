@@ -17,7 +17,7 @@ void free_arp_scan(nmap_r **scan);
 /* interactive.c */
 int ask_user_for_gateway();
 int ask_attack_type();
-int ask_index(nmap_r **scan, const struct arguments *arguments);
+long long ask_index(nmap_r **scan, const struct arguments *arguments);
 
 /* utils.c */
 int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN]);

@@ -201,7 +201,7 @@ nmap_r **nmapscan(struct arguments *arguments)
 
 	/* this ISNT portable at all but give me a simpler anwser than what's on this thread and i put it
 	https://stackoverflow.com/questions/6657475/netmask-conversion-to-cidr-format-in-c */
-	snprintf(command, 128, "nmap -PR -sn %hhu.%hhu.%hhu.%hhu/%d",
+	snprintf(command, 128, "nmap -PR -sn -n %hhu.%hhu.%hhu.%hhu/%d",
 		arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],
 		arguments->gateway_pa[2] & arguments->netmask[2], arguments->gateway_pa[3] & arguments->netmask[3],
 		__builtin_popcount(*(uint32_t*)arguments->netmask)

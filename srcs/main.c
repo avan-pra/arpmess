@@ -26,11 +26,28 @@ int main(int argc, char **argv)
 	/* arguments.target_list == NULL */
 	if (!(scan = nmapscan(&arguments))) 
 		goto err;
-	
-	action = ask_attack_type();
 
-	if (action == ACTION_ONE) {
-		int hostidx = ask_index(scan, &arguments);
+	while (1)
+	{
+		action = ask_attack_type();
+
+		if (action == ACTION_ONE) {
+			long long hostidx = ask_index(scan, &arguments);
+			if (hostidx == ACTION_EXIT)
+				break;
+			if (hostidx == ACTION_RETURN)
+				continue;
+			// start_attack();
+			break;
+		}
+		if (action == ACTION_SOME) {
+			ERROR_NO_YET_IMPLEMENTED();
+		}
+		if (action == ACTION_ALL) {
+			ERROR_NO_YET_IMPLEMENTED();
+		}
+		else if (action == ACTION_EXIT)
+			break;
 	}
 
 	free_arp_scan(scan);

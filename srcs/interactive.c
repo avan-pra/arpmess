@@ -1,4 +1,5 @@
 # include <stdio.h>
+# include <stdlib.h>
 # include "utils.h"
 
 static void PRINT_SCAN_LIST(nmap_r **scan, const struct arguments *arguments)
@@ -18,25 +19,44 @@ static void PRINT_SCAN_LIST(nmap_r **scan, const struct arguments *arguments)
 		scan[i]->vendor,
 		scan[i]->vendor_extra);
 	}
-	printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
+	printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
 }
 
-int ask_index(nmap_r **scan, const struct arguments *arguments)
+char get_first_non_whitespace(char *buf)
 {
-	unsigned int target;
+	for (size_t i = 0; buf[i]; ++i) {
+		if (!isspace(buf[i]))
+			return buf[i];
+	}
+	return 0;
+}
+
+long long ask_index(nmap_r **scan, const struct arguments *arguments)
+{
+	long long target;
+	char buffer[0x40];
 	char c;
 
 	PRINT_SCAN_LIST(scan, arguments);
 	while (1) {
-		scanf(" %u", &target);
-		if (target < arguments->scanamount && scan[target]->gateway == 0 && scan[target]->self == 0)
-			break;
-		c = getchar();
+		fgets(buffer, 0x40, stdin);
+		target = atoll(buffer);
+		c = get_first_non_whitespace(buffer);
 		if (c == 'E')
-			return -1;
-		if (target < arguments->scanamount && (scan[target]->gateway == 0 || scan[target]->self == 0))
+			return ACTION_EXIT;
+		if (c == 'R')
+			return ACTION_RETURN;
+		if (((c >= '0' && c <= '9') || c == '+' || c == '-') && target >= 0 && target < arguments->scanamount && scan[target]->gateway == 0 && scan[target]->self == 0)
+			break;
+		if (((c >= '0' && c <= '9') || c == '+' || c == '-') && target >= 0 && target < arguments->scanamount && (scan[target]->gateway == 0 || scan[target]->self == 0))
 			ERROR_CANT_SELECT_SELF_OR_GATEWAY();
-		ERROR_UNRECOGNIZED_UINTEGER_ASK(target);
+
+		if (((c >= '0' && c <= '9') || c == '+' || c == '-'))
+			ERROR_UNRECOGNIZED_LONG_ASK(target)
+		else
+			ERROR_UNRECOGNIZED_CHAR_ASK(c);
+
 		PRINT_SCAN_LIST(scan, arguments);
 	}
 	return target;
@@ -45,16 +65,20 @@ int ask_index(nmap_r **scan, const struct arguments *arguments)
 int ask_attack_type()
 {
 	int action;
+	char buffer[0x40];
 
 	ASK_ATTACK_TYPE();
 	while (1) {
-		scanf(" %c", &action);
+		fgets(buffer, 0x40, stdin);
+		action = buffer[0];
 		if (action == '1' || action == '2'
 		|| action == '3' || action == 'E')
 			break;
 		ERROR_UNRECOGNIZED_CHAR_ASK(action);
 		ASK_ATTACK_TYPE();
 	}
+	if (action == 'E')
+		return ACTION_EXIT;
 	return action;
 }
 

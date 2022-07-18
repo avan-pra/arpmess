@@ -27,6 +27,9 @@ int main(int argc, char **argv)
 	if (!(scan = nmapscan(&arguments))) 
 		goto err;
 
+	if (fill_vendor_from_manuf_file(scan) != 0)
+		goto err;
+
 	while (1)
 	{
 		action = ask_attack_type();

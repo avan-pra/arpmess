@@ -12,12 +12,12 @@ static void PRINT_SCAN_LIST(nmap_r **scan, const struct arguments *arguments)
 		if (scan[i]->self == 1) {
 			printf(ANSI_COLOR_BLUE"you"ANSI_COLOR_RESET);
 		}
-		printf("\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"%d"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET"\t"MACCOLOR"%hhx:%hhx:%hhx:%hhx:%hhx:%hhx"ANSI_COLOR_RESET"\t%s\t(%s)\n",
+		printf("\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"%d"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET"\t"MACCOLOR"%hhx:%hhx:%hhx:%hhx:%hhx:%hhx"ANSI_COLOR_RESET"\t"VENDORCOLOR"%s"ANSI_COLOR_RESET"\t"VENDORCOLOREXTRA"%s"ANSI_COLOR_RESET"\n",
 		i,
 		scan[i]->pa[0], scan[i]->pa[1], scan[i]->pa[2], scan[i]->pa[3],
 		scan[i]->ha[0], scan[i]->ha[1], scan[i]->ha[2], scan[i]->ha[3], scan[i]->ha[4], scan[i]->ha[5],
-		scan[i]->vendor,
-		scan[i]->vendor_extra);
+		(scan[i]->vendor == NULL ? "N/A" : scan[i]->vendor),
+		(scan[i]->vendor_extra == NULL ? "" : scan[i]->vendor_extra));
 	}
 	printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);

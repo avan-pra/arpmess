@@ -208,8 +208,8 @@ nmap_r **nmapscan(struct arguments *arguments)
 	);
 	TELLSCAN(arguments->gateway_pa, arguments->netmask);
 
-	fd = popen(command, "r");
-	// fd = fopen("res", "r");
+	// fd = popen(command, "r");
+	fd = fopen("res", "r");
 	pthread_create(&thread, NULL, print_nmap_running, &scan_status);
 
 	if (!(scan = parse_arp_scan(fd, arguments)))

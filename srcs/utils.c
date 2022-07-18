@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "define.h"
+#include "struct.h"
 
 void print_mac_address(const uint8_t addr[ETH_ALEN])
 {
@@ -45,6 +47,15 @@ int is_mac_equal(const uint8_t pa1[ETH_ALEN], const uint8_t pa2[ETH_ALEN])
 	return 1;
 }
 
+int is_mac_equal_manuf(const uint8_t pa1[ETH_ALEN], const uint8_t pa2[ETH_ALEN])
+{
+	for (size_t i = 0; i < 3; ++i) {
+		if (pa1[i] != pa2[i])
+			return 0;
+	}
+	return 1;
+}
+
 /* return wheter the given addr is a hardware broadcast address */
 int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN])
 {
@@ -53,4 +64,118 @@ int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN])
 			return 0;	
 	}
 	return 1;
+}
+
+static void free_manu_db(manuf_db **db)
+{
+	for (size_t i = 0; db && db[i] != NULL; ++i) {
+		if (db[i]->vendor != NULL)
+			free(db[i]->vendor);
+		if (db[i]->vendor_extra != NULL)
+			free(db[i]->vendor_extra);
+		free(db[i]);
+	}
+	if (db)
+		free(db);
+}
+
+# define REALLOCSIZE 1000
+static manuf_db **create_manu_database(FILE *fd)
+{
+	char *line = NULL, *saveptr = NULL;
+	int sres = 0;
+	size_t size = 0;
+	size_t dblen = 0;
+	manuf_db **db = NULL;
+	size_t i = 0;
+
+	/* read the file line by line */
+	while (getline(&line, &size, fd) > 0) {
+		/* realloc if size is not greate enough */
+		if (i + 1 >= dblen) {
+			if (!(db = realloc(db, (dblen + REALLOCSIZE) * sizeof(manuf_db*))))
+				goto err;
+			for (int j = i; j < dblen + REALLOCSIZE; ++j) {
+				memset(&db[j], 0, sizeof(manuf_db*));
+			}
+			dblen = dblen + REALLOCSIZE;
+		}
+		/* is it a comment if so dont increment anything*/
+		if (line[0] == '#' || line[0] == '\n') {
+			free(line);
+			line = NULL;
+			continue;
+		}
+		if (!(db[i] = calloc(1, sizeof(manuf_db))))
+			goto err;
+		sres = sscanf(line, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", &db[i]->ha[0], &db[i]->ha[1], &db[i]->ha[2], &db[i]->ha[3], &db[i]->ha[4], &db[i]->ha[5]);
+		/* ignore 6 len entry */
+		if (sres != 3) {
+			free(db[i]);
+			continue;
+		}
+		strtok_r(line, "\t", &saveptr);
+
+		/* handle vendor */
+		if (!(db[i]->vendor = strdup(strtok_r(NULL, "\t", &saveptr))))
+			goto err;
+		if (db[i]->vendor != NULL && db[i]->vendor[strlen(db[i]->vendor) - 1] == '\n')
+			db[i]->vendor[strlen(db[i]->vendor) - 1] = 0x0;
+
+		/* handle vendor_extra */
+		db[i]->vendor_extra = strtok_r(NULL, "\t", &saveptr);
+		if (db[i]->vendor_extra != NULL) {
+			if (!(db[i]->vendor_extra = strdup(db[i]->vendor_extra)))
+				goto err;
+		}
+		if (db[i]->vendor_extra != NULL && db[i]->vendor_extra[strlen(db[i]->vendor_extra) - 1] == '\n')
+			db[i]->vendor_extra[strlen(db[i]->vendor_extra) - 1] = 0x0;
+
+		++i;
+		free(line);
+		line = NULL;
+	}
+	free(line);
+
+	return db;
+
+err:
+	free_manu_db(db);
+	return NULL;
+}
+
+int fill_vendor_from_manuf_file(nmap_r **scan) {
+	FILE *fd;
+	manuf_db **db;
+
+	if (!(fd = fopen("manuf", "r")))
+		goto err;
+	if (!(db = create_manu_database(fd)))
+		goto err;
+	for (size_t i = 0; scan[i]; ++i) {
+		for (size_t j = 0; db[j] != NULL; ++j) {
+			if (is_mac_equal_manuf(db[j]->ha, scan[i]->ha))
+			{
+				if (db[j]->vendor != NULL) {
+					if (!(scan[i]->vendor = strdup(db[j]->vendor)))
+						goto err;
+				}
+				if (db[j]->vendor_extra != NULL) {
+					if (!(scan[i]->vendor_extra = strdup(db[j]->vendor_extra)))
+						goto err;
+				}
+				break;
+			}
+		}
+	}
+	fclose(fd);
+	free_manu_db(db);
+	return 0;
+
+err:
+	if (fd)
+		fclose(fd);
+	if (db)
+		free_manu_db(db);
+	return 0;
 }

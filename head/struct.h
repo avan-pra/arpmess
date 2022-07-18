@@ -65,4 +65,11 @@ typedef struct nmap_t
 	char *vendor_extra;
 }	nmap_r;
 
+typedef struct manuf_db_t
+{
+	uint8_t ha[ETH_ALEN];
+	char *vendor;
+	char *vendor_extra;
+}	manuf_db;
+
 # endif

@@ -149,7 +149,7 @@ int fill_vendor_from_manuf_file(nmap_r **scan) {
 	manuf_db **db = NULL;
 
 	if (!(fd = fopen("manuf", "r")))
-		goto err;
+		{ ERROR_NO_MANUF_FILE(); return 0; }
 	if (!(db = create_manu_database(fd)))
 		goto err;
 	for (size_t i = 0; scan[i]; ++i) {
@@ -177,5 +177,5 @@ err:
 		fclose(fd);
 	if (db)
 		free_manu_db(db);
-	return 0;
+	return 1;
 }

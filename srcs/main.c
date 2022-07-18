@@ -40,7 +40,8 @@ int main(int argc, char **argv)
 				break;
 			if (hostidx == ACTION_RETURN)
 				continue;
-			// start_attack();
+			if (start_attack_one(&arguments, scan[hostidx]) != 0)
+				goto err;
 			break;
 		}
 		if (action == ACTION_SOME) {

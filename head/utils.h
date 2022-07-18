@@ -29,4 +29,7 @@ void copy_ipv4(uint8_t dest[IPV4_LEN], const uint8_t src[IPV4_LEN]);
 void copy_mac(uint8_t dest[ETH_ALEN], const uint8_t src[ETH_ALEN]);
 int fill_vendor_from_manuf_file(nmap_r **scan);
 
+/* attack.c */
+int start_attack_one(const struct arguments *arguments, nmap_r *scan);
+
 #endif

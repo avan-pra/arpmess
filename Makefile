@@ -13,11 +13,12 @@ SRCSFILE = \
 	argparse.c \
 	interactive.c \
 	network.c \
-	utils.c
+	utils.c \
+	attack.c
 
 OBJ = $(SRCS:.c=.o)
 
-all: $(NAME)
+all: $(NAME) copy
 
 $(NAME): $(OBJ)
 	$(CC) $(OBJ) $(CFLAGS) -o $(NAME)
@@ -28,7 +29,10 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 
-re: fclean $(NAME)
+re: fclean $(NAME) copy
+
+vendor:
+	curl https://gitlab.com/wireshark/wireshark/-/raw/master/manuf --output manuf || wget https://gitlab.com/wireshark/wireshark/-/raw/master/manuf
 
 copy:
 	docker cp arpmess workctn:/root/arpmess

@@ -94,7 +94,7 @@ static manuf_db **create_manu_database(FILE *fd)
 		/* realloc if size is not greate enough */
 		if (i + 1 >= dblen) {
 			if (!(db = realloc(db, (dblen + REALLOCSIZE) * sizeof(manuf_db*))))
-				goto err;
+				{ ERROR_MALLOC(); goto err; }
 			for (int j = i; j < dblen + REALLOCSIZE; ++j) {
 				memset(&db[j], 0, sizeof(manuf_db*));
 			}
@@ -107,7 +107,7 @@ static manuf_db **create_manu_database(FILE *fd)
 			continue;
 		}
 		if (!(db[i] = calloc(1, sizeof(manuf_db))))
-			goto err;
+			{ ERROR_MALLOC(); goto err; }
 		sres = sscanf(line, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", &db[i]->ha[0], &db[i]->ha[1], &db[i]->ha[2], &db[i]->ha[3], &db[i]->ha[4], &db[i]->ha[5]);
 		/* ignore 6 len entry */
 		if (sres != 3) {
@@ -118,7 +118,7 @@ static manuf_db **create_manu_database(FILE *fd)
 
 		/* handle vendor */
 		if (!(db[i]->vendor = strdup(strtok_r(NULL, "\t", &saveptr))))
-			goto err;
+			{ ERROR_MALLOC(); goto err; }
 		if (db[i]->vendor != NULL && db[i]->vendor[strlen(db[i]->vendor) - 1] == '\n')
 			db[i]->vendor[strlen(db[i]->vendor) - 1] = 0x0;
 
@@ -126,7 +126,7 @@ static manuf_db **create_manu_database(FILE *fd)
 		db[i]->vendor_extra = strtok_r(NULL, "\t", &saveptr);
 		if (db[i]->vendor_extra != NULL) {
 			if (!(db[i]->vendor_extra = strdup(db[i]->vendor_extra)))
-				goto err;
+				{ ERROR_MALLOC(); goto err; }
 		}
 		if (db[i]->vendor_extra != NULL && db[i]->vendor_extra[strlen(db[i]->vendor_extra) - 1] == '\n')
 			db[i]->vendor_extra[strlen(db[i]->vendor_extra) - 1] = 0x0;
@@ -145,8 +145,8 @@ err:
 }
 
 int fill_vendor_from_manuf_file(nmap_r **scan) {
-	FILE *fd;
-	manuf_db **db;
+	FILE *fd = NULL;
+	manuf_db **db = NULL;
 
 	if (!(fd = fopen("manuf", "r")))
 		goto err;

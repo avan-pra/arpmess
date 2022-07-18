@@ -56,14 +56,16 @@
 
 # define ERROR_UID(UID, PROG_PATH) { fprintf(stderr, "%sExpected uid %d to run %s, got %d\n", SAMPLE_ERROR, 0, PROG_PATH, UID); }
 # define ERROR_EXIT() { fprintf(stderr, "%s"ANSI_COLOR_RED"Exiting...\n"ANSI_COLOR_RESET, SAMPLE_ERROR); }
-# define ERROR_NO_IFACE(IFACENAME) { IFACENAME == NULL ? fprintf(stderr, "%sCould not find a fitting interface\n", SAMPLE_ERROR) : printf("%sinterface %s not found or not fitting\n", SAMPLE_ERROR, IFACENAME); }
+# define ERROR_NO_IFACE(IFACENAME) { IFACENAME == NULL ? fprintf(stderr, "%sCould not find a fitting interface\n", SAMPLE_ERROR) : printf("%sinterface %s not found or not fitting\n", SAMPLE_ERROR, (char*)IFACENAME); }
 # define ERROR_NO_GATEWAY() { fprintf(stderr, "%sCould not find a gateway\n", SAMPLE_ERROR); }
 # define ERROR_NO_INFO_FOR_IFACE(IFACENAME) { fprintf(stderr, "%sCould not find ipv4 and harware address of interface %s\n", SAMPLE_ERROR, IFACENAME); }
 # define ERROR_MALLOC() { fprintf(stderr, "%smalloc() returned NULL\n", SAMPLE_ERROR); }
-# define ERROR_NMAP(LINE) { fprintf(stderr, "%s The nmap scan returned an incomprehensible line: |%s|", SAMPLE_ERROR, LINE); }
+# define ERROR_POPEN() { fprintf(stderr, "%spopen() returned NULL\n", SAMPLE_ERROR); }
+# define ERROR_NMAP(LINE) { fprintf(stderr, "%sThe nmap scan returned an incomprehensible line: |%s|", SAMPLE_ERROR, LINE); }
+# define ERROR_SCAN() { fprintf(stderr, "%sThere was a prolem with the nmap scan, is the tool installed ?\n", SAMPLE_ERROR); }
 # define ERROR_UNRECOGNIZED_CHAR_ASK(CHAR) { fprintf(stderr, "%sUnrecognized selected choice: %c\n", SAMPLE_ERROR, CHAR); }
 # define ERROR_UNRECOGNIZED_UINTEGER_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %u\n", SAMPLE_ERROR, INT); }
-# define ERROR_UNRECOGNIZED_LONG_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %ld\n", SAMPLE_ERROR, INT); }
+# define ERROR_UNRECOGNIZED_LONG_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %lld\n", SAMPLE_ERROR, INT); }
 # define ERROR_CANT_SELECT_SELF_OR_GATEWAY() { fprintf(stderr, "%sYou can't poison neither the gateway nor yourself\n", SAMPLE_ERROR); }
 # define ERROR_NO_YET_IMPLEMENTED() { fprintf(stderr, "%sThis feature hasnt been implemented yet\n", SAMPLE_ERROR); }
 

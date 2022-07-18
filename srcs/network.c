@@ -69,6 +69,7 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 
 	freeifaddrs(ifap);
 	if (ipmatch >= 1 && macmatch >= 1) {
+		netmask[2] = 255;
 		TELLIFACEINFO(name, ipv4, netmask, mac);
 		return 0;
 	}
@@ -183,6 +184,9 @@ nmap_r **parse_arp_scan(FILE *fd, const struct arguments *arguments)
 		line = NULL;
 	}
 	free(line);
+
+	if (scan == NULL)
+		ERROR_SCAN();
 	return scan;
 
 err:
@@ -194,22 +198,24 @@ err:
 nmap_r **nmapscan(struct arguments *arguments)
 {
 	char command[128];
-	FILE *fd;
+	FILE *fd = NULL;
 	pthread_t thread; /* used to print hang on to stdout */
 	int scan_status = 1;
 	nmap_r **scan = NULL; /* hold result of the arp nmap scan */
 
 	/* this ISNT portable at all but give me a simpler anwser than what's on this thread and i put it
 	https://stackoverflow.com/questions/6657475/netmask-conversion-to-cidr-format-in-c */
-	snprintf(command, 128, "nmap -PR -sn -n %hhu.%hhu.%hhu.%hhu/%d",
+	snprintf(command, 128, "nmap -PR -sn -n %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
 		arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],
 		arguments->gateway_pa[2] & arguments->netmask[2], arguments->gateway_pa[3] & arguments->netmask[3],
 		__builtin_popcount(*(uint32_t*)arguments->netmask)
 	);
 	TELLSCAN(arguments->gateway_pa, arguments->netmask);
 
-	// fd = popen(command, "r");
-	fd = fopen("res", "r");
+	fd = popen(command, "r");
+	// fd = fopen("res", "r");
+	if (!fd)
+		{ ERROR_POPEN(); goto err; }
 	pthread_create(&thread, NULL, print_nmap_running, &scan_status);
 
 	if (!(scan = parse_arp_scan(fd, arguments)))
@@ -240,6 +246,7 @@ nmap_r **nmapscan(struct arguments *arguments)
 	return scan;
 
 err:
-	pclose(fd);
+	if (fd)
+		pclose(fd);
 	return NULL;
 }

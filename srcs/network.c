@@ -18,7 +18,7 @@
 #include "struct.h"
 
 /* retreive IPv4 address and mac address of the requestes name interface */
-int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LEN], uint8_t mac[ETH_ALEN], uint8_t netmask[ETH_ALEN])
+int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LEN], uint8_t mac[ETH_ALEN], uint8_t netmask[IPV4_LEN])
 {
 	struct ifaddrs *ifap;
 	struct ifaddrs *ifap_it;

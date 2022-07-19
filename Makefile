@@ -29,7 +29,7 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 
-re: fclean $(NAME)
+re: fclean $(NAME) copy shell
 
 vendor:
 	curl https://gitlab.com/wireshark/wireshark/-/raw/master/manuf --output manuf || wget https://gitlab.com/wireshark/wireshark/-/raw/master/manuf
@@ -41,12 +41,14 @@ container:
 	docker build -t arpmessimg .
 	docker run --name workctn -dit --cap-add=NET_ADMIN --cap-add=NET_RAW arpmessimg
 	docker run --name victctn -dit --cap-add=NET_ADMIN arpmessimg
+	docker run --name victctn2 -dit --cap-add=NET_ADMIN arpmessimg
+	docker run --name victctn3 -dit --cap-add=NET_ADMIN arpmessimg
 
 start:
-	docker start workctn victctn
+	docker start workctn victctn victctn2 victctn3
 
 delete:
-	docker rm -f workctn victctn
+	docker rm -f workctn victctn victctn2 victctn3
 
 shell:
 	docker exec -ti -w /root/arpmess workctn /bin/bash

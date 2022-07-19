@@ -3,15 +3,15 @@
 # include <ctype.h>
 # include "utils.h"
 
-static void PRINT_SCAN_LIST(nmap_r **scan, const struct arguments *arguments)
+void PRINT_SCAN_LIST(nmap_r **scan, const struct arguments *arguments)
 {
-	printf("\n%sChoose an host from the list:\n\n", SAMPLE_INFO);
+	printf("\n");
 	for (size_t i = 0; scan[i]; ++i) {
 		if (scan[i]->gateway == 1) {
-			printf(ANSI_COLOR_BLUE"gateway"ANSI_COLOR_RESET);
+			printf(ANSI_COLOR_256_ORANGE"gateway"ANSI_COLOR_RESET);
 		}
 		if (scan[i]->self == 1) {
-			printf(ANSI_COLOR_BLUE"you"ANSI_COLOR_RESET);
+			printf(ANSI_COLOR_256_ORANGE"you"ANSI_COLOR_RESET);
 		}
 		printf("\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"%ld"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET"\t"MACCOLOR"%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx"ANSI_COLOR_RESET"\t"VENDORCOLOR"%s"ANSI_COLOR_RESET"\t"VENDORCOLOREXTRA"%s"ANSI_COLOR_RESET"\n",
 		i,
@@ -20,8 +20,6 @@ static void PRINT_SCAN_LIST(nmap_r **scan, const struct arguments *arguments)
 		(scan[i]->vendor == NULL ? "N/A" : scan[i]->vendor),
 		(scan[i]->vendor_extra == NULL ? "" : scan[i]->vendor_extra));
 	}
-	printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
-\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
 }
 
 char get_first_non_whitespace(char *buf)
@@ -39,7 +37,10 @@ long long ask_index(nmap_r **scan, const struct arguments *arguments)
 	char buffer[0x40];
 	char c;
 
+	printf("\n%sChoose an host from the list:\n", SAMPLE_INFO);
 	PRINT_SCAN_LIST(scan, arguments);
+	printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
 	while (1) {
 		fgets(buffer, 0x40, stdin);
 		target = atoll(buffer);
@@ -57,8 +58,10 @@ long long ask_index(nmap_r **scan, const struct arguments *arguments)
 			ERROR_UNRECOGNIZED_LONG_ASK(target)
 		else
 			ERROR_UNRECOGNIZED_CHAR_ASK(c);
-
+		printf("\n%sChoose an host from the list:\n\n", SAMPLE_INFO);
 		PRINT_SCAN_LIST(scan, arguments);
+		printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
 	}
 	return target;
 }
@@ -75,7 +78,7 @@ int ask_action()
 		action = toupper(buffer[0]);
 		if (action == '1' || action == '2'
 		|| action == '3' || action == 'E'
-		|| action == 'S')
+		|| action == 'S' || action == 'L')
 			break;
 		ERROR_UNRECOGNIZED_CHAR_ASK(action);
 		ASK_ATTACK_TYPE();
@@ -84,6 +87,8 @@ int ask_action()
 		return ACTION_EXIT;
 	if (action == 'S')
 		return ACTION_SCAN;
+	if (action == 'L')
+		return ACTION_LIST;
 	return action;
 }
 

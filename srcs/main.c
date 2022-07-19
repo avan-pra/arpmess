@@ -31,10 +31,13 @@ int main(int argc, char **argv)
 	if (fill_vendor_from_manuf_file(scan) != 0)
 		goto err;
 
+	TELLHEADER();
+
 	while (1)
 	{
 		action = ask_action();
 
+		/* 1 */
 		if (action == ACTION_ONE) {
 			long long hostidx = ask_index(scan, &arguments);
 			if (hostidx == ACTION_EXIT)
@@ -45,19 +48,33 @@ int main(int argc, char **argv)
 				goto err;
 			continue;
 		}
-		if (action == ACTION_SOME) {
+		/* 2 */
+		else if (action == ACTION_SOME) {
 			ERROR_NO_YET_IMPLEMENTED();
 		}
-		if (action == ACTION_ALL) {
-			ERROR_NO_YET_IMPLEMENTED();
+		/* 3 */
+		else if (action == ACTION_ALL) {
+			if (arguments.scanamount - 2 > 0) {
+				if (start_attack_all(&arguments, scan) != 0)
+					goto err;
+			}
+			else
+				NETWORK_EMPTY();
 		}
-		if (action == ACTION_SCAN) {
+		/* L */
+		else if (action == ACTION_LIST) {
+			PRINT_SCAN_LIST(scan, &arguments);
+		}
+		/* S */
+		else if (action == ACTION_SCAN) {
 			free_arp_scan(scan);
+			TELLRESCAN();
 			if (!(scan = nmapscan(&arguments))) 
 				goto err;
 			if (fill_vendor_from_manuf_file(scan) != 0)
 				goto err;
 		}
+		/* E */
 		else if (action == ACTION_EXIT)
 			break;
 	}

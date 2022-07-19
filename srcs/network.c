@@ -245,6 +245,8 @@ nmap_r **nmapscan(struct arguments *arguments)
 	TELLDONESCANNING(arguments->scanamount, (int)pow(2, ((32 - __builtin_popcount(*(uint32_t*)arguments->netmask)))));
 	if (is_first_scan)
 		TELLGATEWAYHA(arguments->gateway_ha);
+	if (arguments->scanamount <= 2)
+		NETWORK_EMPTY();
 	return scan;
 
 err:

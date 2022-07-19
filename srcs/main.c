@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 		}
 		/* L */
 		else if (action == ACTION_LIST) {
-			PRINT_SCAN_LIST(scan, &arguments);
+			PRINT_SCAN_LIST(scan);
 		}
 		/* S */
 		else if (action == ACTION_SCAN) {

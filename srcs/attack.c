@@ -61,7 +61,7 @@ static void *arpthread(void *argp)
 	eth *eth_hdr = (eth*)payload;
 	arp *arp_hdr = (arp*)(payload + ETH_HLEN);
 	struct sockaddr_ll ifaceinfo = { 0x0 };
-	socklen_t ifaceinfolen;
+	// socklen_t ifaceinfolen;
 	size_t rlen;
 
 	copy_mac(eth_hdr->dest_addr, target->ha);	/* 6 bytes dest addr */

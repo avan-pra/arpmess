@@ -3,7 +3,7 @@
 # include <ctype.h>
 # include "utils.h"
 
-void PRINT_SCAN_LIST(nmap_r **scan, const struct arguments *arguments)
+void PRINT_SCAN_LIST(nmap_r **scan)
 {
 	printf("\n");
 	for (size_t i = 0; scan[i]; ++i) {
@@ -38,7 +38,7 @@ long long ask_index(nmap_r **scan, const struct arguments *arguments)
 	char c;
 
 	printf("\n%sChoose an host from the list:\n", SAMPLE_INFO);
-	PRINT_SCAN_LIST(scan, arguments);
+	PRINT_SCAN_LIST(scan);
 	printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
 	while (1) {
@@ -59,7 +59,7 @@ long long ask_index(nmap_r **scan, const struct arguments *arguments)
 		else
 			ERROR_UNRECOGNIZED_CHAR_ASK(c);
 		printf("\n%sChoose an host from the list:\n\n", SAMPLE_INFO);
-		PRINT_SCAN_LIST(scan, arguments);
+		PRINT_SCAN_LIST(scan);
 		printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
 	}
@@ -94,5 +94,5 @@ int ask_action()
 
 int ask_user_for_gateway()
 {
-	;
+	return 0;
 }

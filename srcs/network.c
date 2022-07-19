@@ -55,8 +55,8 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 			/* if we already read a macaddr ask the user if he wants to use the new instead */
 			/* THIS PART HASNT BEEN TESTED IDK IF IT'S EVEN USEFUL */
 			if (macmatch >= 1) {
-				uint8_t tmp[ETH_ALEN];
-				for (int i = 0; i < ETH_ALEN; ++i)
+				uint8_t tmp[ETH_ALEN] = { 0x0 };
+				for (size_t i = 0; i < ETH_ALEN; ++i)
 					mac[i] = ((struct sockaddr_ll*)ifap_it->ifa_addr)->sll_addr[i];
 				ASK_OLD_OR_NEW_MAC(&macchoice, name, mac, tmp);
 			}
@@ -136,6 +136,7 @@ static void *print_nmap_running(void *argp)
 		}
 		sleep(0.2);
 	}
+	return NULL;
 }
 
 void free_arp_scan(nmap_r **scan)
@@ -151,7 +152,7 @@ void free_arp_scan(nmap_r **scan)
 		free(scan);
 }
 
-nmap_r **parse_arp_scan(FILE *fd, const struct arguments *arguments)
+nmap_r **parse_arp_scan(FILE *fd)
 {
 	char *line = NULL;
 	size_t size = 0;
@@ -219,7 +220,7 @@ nmap_r **nmapscan(struct arguments *arguments)
 		{ ERROR_POPEN(); goto err; }
 	pthread_create(&thread, NULL, print_nmap_running, &scan_status);
 
-	if (!(scan = parse_arp_scan(fd, arguments)))
+	if (!(scan = parse_arp_scan(fd)))
 		goto err;
 	pclose(fd);
 

@@ -12,17 +12,20 @@ int g_stop = 1;
 
 void sighandler(int signum)
 {
-	g_stop = 0;
+	// fucking wall wextra werror
+	g_stop = signum - signum;
 }
 
 int start_signal()
 {
 	signal(SIGINT, sighandler);
+	return 0;
 }
 
 int stop_signal()
 {
 	signal(SIGINT, SIG_DFL);
+	return 0;
 }
 
 void print_mac_address(const uint8_t addr[ETH_ALEN])
@@ -122,7 +125,7 @@ static manuf_db **create_manu_database(FILE *fd)
 		if (i + 1 >= dblen) {
 			if (!(db = realloc(db, (dblen + REALLOCSIZE) * sizeof(manuf_db*))))
 				{ ERROR_MALLOC(); goto err; }
-			for (int j = i; j < dblen + REALLOCSIZE; ++j) {
+			for (size_t j = i; j < dblen + REALLOCSIZE; ++j) {
 				memset(&db[j], 0, sizeof(manuf_db*));
 			}
 			dblen = dblen + REALLOCSIZE;

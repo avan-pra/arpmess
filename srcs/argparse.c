@@ -11,10 +11,10 @@
 */
 static struct argp_option options[] =
 {
-	{ "interface", 'i', "INTERFACE_NAME", 0, "Specify interface to use (ex: eth0) IF_NAMESIZE max" },
-	{ "packets", 'p', "NUMBER", 0, "Number of packets broadcasted per minute (default: 12)" },
-	{ "target", 't', "IP1,IP2", 0, "Target list YET TO BE IMPLEMENTED"},
-	{ "verbose", 'v', 0, 0, "Produce verbose output USELESS AS OF NOW" },
+	{ "interface", 'i', "INTERFACE_NAME", 0, "Specify interface to use (ex: eth0) IF_NAMESIZE max", 0x0 },
+	{ "packets", 'p', "NUMBER", 0, "Number of packets broadcasted per minute (default: 12)", 0x0 },
+	{ "target", 't', "IP1,IP2", 0, "Target list YET TO BE IMPLEMENTED", 0x0 },
+	{ "verbose", 'v', 0, 0, "Produce verbose output USELESS AS OF NOW", 0x0 },
 	{0x0}
 };
 
@@ -32,13 +32,14 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 			strncpy(arguments->ifacename, arg, sizeof(arguments->ifacename));
 			break;
 
-		case 'p':
+		case 'p': {
 			arguments->ppm = atoi(arg);
 			if (arguments->ppm <= 0) {
 				ERROR_PACKET_PER_MINUTE();
 				argp_usage(state);
 			}
-
+			break;
+		}
 		case 't':
 			arguments->target_list = arg;
 			break;
@@ -68,7 +69,7 @@ static char doc[] = \
 "NETMASKCOLOR"Color for netmask\
 "ANSI_COLOR_RESET;
 
-	static struct argp argp = { options, parse_opt, args_doc, doc };
+	static struct argp argp = { options, parse_opt, args_doc, doc, 0, 0, 0 };
 
 	return argp_parse(&argp, argc, argv, 0, 0, arguments);
 }

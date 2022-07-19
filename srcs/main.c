@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
 	while (1)
 	{
-		action = ask_attack_type();
+		action = ask_action();
 
 		if (action == ACTION_ONE) {
 			long long hostidx = ask_index(scan, &arguments);
@@ -43,13 +43,20 @@ int main(int argc, char **argv)
 				continue;
 			if (start_attack_one(&arguments, scan[hostidx]) != 0)
 				goto err;
-			break;
+			continue;
 		}
 		if (action == ACTION_SOME) {
 			ERROR_NO_YET_IMPLEMENTED();
 		}
 		if (action == ACTION_ALL) {
 			ERROR_NO_YET_IMPLEMENTED();
+		}
+		if (action == ACTION_SCAN) {
+			free_arp_scan(scan);
+			if (!(scan = nmapscan(&arguments))) 
+				goto err;
+			if (fill_vendor_from_manuf_file(scan) != 0)
+				goto err;
 		}
 		else if (action == ACTION_EXIT)
 			break;

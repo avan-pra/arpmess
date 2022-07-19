@@ -35,7 +35,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		case 'p':
 			arguments->ppm = atoi(arg);
 			if (arguments->ppm <= 0) {
-				printf("%sAmount of packets sent per minute must be > 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm);
+				ERROR_PACKET_PER_MINUTE();
 				argp_usage(state);
 			}
 

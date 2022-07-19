@@ -3,9 +3,27 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "define.h"
 #include "struct.h"
+
+int g_stop = 1;
+
+void sighandler(int signum)
+{
+	g_stop = 0;
+}
+
+int start_signal()
+{
+	signal(SIGINT, sighandler);
+}
+
+int stop_signal()
+{
+	signal(SIGINT, SIG_DFL);
+}
 
 void print_mac_address(const uint8_t addr[ETH_ALEN])
 {
@@ -42,6 +60,15 @@ int is_mac_equal(const uint8_t pa1[ETH_ALEN], const uint8_t pa2[ETH_ALEN])
 {
 	for (size_t i = 0; i < ETH_ALEN; ++i) {
 		if (pa1[i] != pa2[i])
+			return 0;
+	}
+	return 1;
+}
+
+int is_mac_empty(const uint8_t mac[ETH_ALEN])
+{
+	for (size_t i = 0; i < ETH_ALEN; ++i) {
+		if (mac[i] != 0)
 			return 0;
 	}
 	return 1;

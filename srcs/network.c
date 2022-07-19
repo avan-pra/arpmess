@@ -69,6 +69,7 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 
 	freeifaddrs(ifap);
 	if (ipmatch >= 1 && macmatch >= 1) {
+		netmask[2] = 255;
 		TELLIFACEINFO(name, ipv4, netmask, mac);
 		return 0;
 	}
@@ -197,6 +198,7 @@ err:
 nmap_r **nmapscan(struct arguments *arguments)
 {
 	char command[128];
+	int is_first_scan = is_mac_empty(arguments->gateway_ha); // check wether the gateway ha is empty or not unlikely HA is 0:0:0...
 	FILE *fd = NULL;
 	pthread_t thread; /* used to print hang on to stdout */
 	int scan_status = 1;
@@ -241,7 +243,8 @@ nmap_r **nmapscan(struct arguments *arguments)
 	arguments->scanamount = i;
 
 	TELLDONESCANNING(arguments->scanamount, (int)pow(2, ((32 - __builtin_popcount(*(uint32_t*)arguments->netmask)))));
-	TELLGATEWAYHA(arguments->gateway_ha);
+	if (is_first_scan)
+		TELLGATEWAYHA(arguments->gateway_ha);
 	return scan;
 
 err:

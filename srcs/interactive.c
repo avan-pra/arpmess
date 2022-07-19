@@ -63,7 +63,8 @@ long long ask_index(nmap_r **scan, const struct arguments *arguments)
 	return target;
 }
 
-int ask_attack_type()
+/* attack one, refresh, etc... */
+int ask_action()
 {
 	int action;
 	char buffer[0x40];
@@ -73,13 +74,16 @@ int ask_attack_type()
 		fgets(buffer, 0x40, stdin);
 		action = toupper(buffer[0]);
 		if (action == '1' || action == '2'
-		|| action == '3' || action == 'E')
+		|| action == '3' || action == 'E'
+		|| action == 'S')
 			break;
 		ERROR_UNRECOGNIZED_CHAR_ASK(action);
 		ASK_ATTACK_TYPE();
 	}
 	if (action == 'E')
 		return ACTION_EXIT;
+	if (action == 'S')
+		return ACTION_SCAN;
 	return action;
 }
 

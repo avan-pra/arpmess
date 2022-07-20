@@ -16,7 +16,7 @@ static struct argp_option options[] =
 	{ "interface", 'i', "INTERFACE_NAME", 0, "Specify interface to use (ex: eth0) IF_NAMESIZE max", 0x0 },
 	{ "packets", 'p', "PACKETPERMINUTE", 0, "Number of packets broadcasted per minute (default: 12)", 0x0 },
 	{ "netmask", 'n', "CIDR", 0, "Use netmask to look for hosts instead of the network one IN CIDR NOTATION ex: `-n 24` for 255.255.255.0", 0x0 },
-	{ "nmapflag", 'f', "-FLAG1 -FLAG2", 0, "Add flag to nmap command     WARNING: don't play with this option unless you know what you are doing", 0x0},
+	{ "nmapflag", 'f', "-FLAG1 -FLAG2", 0, "Add flag to nmap command \nWARNING: don't play with this option unless you know what you are doing", 0x0},
 	{ "target", 't', "IP1,IP2", 0, "Target list YET TO BE IMPLEMENTED", 0x0 },
 	{ "verbose", 'v', 0, 0, "Produce verbose output USELESS AS OF NOW", 0x0 },
 	{0x0}

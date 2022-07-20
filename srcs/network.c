@@ -18,7 +18,7 @@
 #include "struct.h"
 
 /* retreive IPv4 address and mac address of the requestes name interface */
-int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LEN], uint8_t mac[ETH_ALEN], uint8_t netmask[IPV4_LEN])
+int get_network_interface_addresses(struct arguments *arguments)
 {
 	struct ifaddrs *ifap;
 	struct ifaddrs *ifap_it;
@@ -30,7 +30,7 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 
 	for (ifap_it = ifap; ifap_it != NULL; ifap_it = ifap_it->ifa_next)
 	{
-		if (strncmp(name, ifap_it->ifa_name, IF_NAMESIZE) == 0
+		if (strncmp(arguments->ifacename, ifap_it->ifa_name, IF_NAMESIZE) == 0
 			&& ifap_it->ifa_addr && ifap_it->ifa_addr->sa_family == AF_INET	/* if interface has an ipv4 */
 			&& (IFF_LOOPBACK & ifap_it->ifa_flags) != IFF_LOOPBACK	/* and interface is not a loopback interface (lo) */
 			&& (IFF_UP & ifap_it->ifa_flags) == IFF_UP)	/* and interface is up */
@@ -39,15 +39,15 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 			if (ipmatch >= 1) {
 				uint8_t tmp[IPV4_LEN];
 				*(uint32_t*)tmp = *(uint32_t*)&(((struct sockaddr_in*)ifap_it->ifa_addr)->sin_addr);
-				ASK_OLD_OR_NEW_IP(&ipchoice, name, ipv4, tmp);
+				ASK_OLD_OR_NEW_IP(&ipchoice, arguments->ifacename, arguments->self_pa, tmp);
 			}
 			/* hope you like ternaries :D */
-			*(uint32_t*)ipv4 = (ipchoice == 'y' ? *(uint32_t*)&(((struct sockaddr_in*)ifap_it->ifa_addr)->sin_addr) : *(uint32_t*)ipv4);
-			*(uint32_t*)netmask = *(uint32_t*)&(((struct sockaddr_in*)ifap_it->ifa_netmask)->sin_addr);
+			*(uint32_t*)arguments->self_pa = (ipchoice == 'y' ? *(uint32_t*)&(((struct sockaddr_in*)ifap_it->ifa_addr)->sin_addr) : *(uint32_t*)arguments->self_pa);
+			*(uint32_t*)arguments->netmask = (arguments->sys_netmask == 1 ? *(uint32_t*)&(((struct sockaddr_in*)ifap_it->ifa_netmask)->sin_addr) : *(uint32_t*)arguments->netmask);
 			ipchoice = 0;
 			ipmatch += 1;
 		}
-		else if (strncmp(name, ifap_it->ifa_name, IF_NAMESIZE) == 0
+		else if (strncmp(arguments->ifacename, ifap_it->ifa_name, IF_NAMESIZE) == 0
 			&& ifap_it->ifa_addr && ifap_it->ifa_addr->sa_family == AF_PACKET	/* if interface is mac */
 			&& (IFF_LOOPBACK & ifap_it->ifa_flags) != IFF_LOOPBACK	/* and interface is not a loopback interface (lo) */
 			&& (IFF_UP & ifap_it->ifa_flags) == IFF_UP)	/* and interface is up */
@@ -57,11 +57,11 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 			if (macmatch >= 1) {
 				uint8_t tmp[ETH_ALEN] = { 0x0 };
 				for (size_t i = 0; i < ETH_ALEN; ++i)
-					mac[i] = ((struct sockaddr_ll*)ifap_it->ifa_addr)->sll_addr[i];
-				ASK_OLD_OR_NEW_MAC(&macchoice, name, mac, tmp);
+					arguments->self_ha[i] = ((struct sockaddr_ll*)ifap_it->ifa_addr)->sll_addr[i];
+				ASK_OLD_OR_NEW_MAC(&macchoice, arguments->ifacename, arguments->self_ha, tmp);
 			}
 			for (int i = 0; macchoice == 'y' && i < ETH_ALEN; ++i)
-				mac[i] = ((struct sockaddr_ll*)ifap_it->ifa_addr)->sll_addr[i];
+				arguments->self_ha[i] = ((struct sockaddr_ll*)ifap_it->ifa_addr)->sll_addr[i];
 			macchoice = 0;
 			macmatch += 1;
 		}
@@ -69,12 +69,14 @@ int get_network_interface_addresses(char name[IF_NAMESIZE], uint8_t ipv4[IPV4_LE
 
 	freeifaddrs(ifap);
 	if (ipmatch >= 1 && macmatch >= 1) {
-		// netmask[2] = 255; // for testing, used to scan a smaller network
-		TELLIFACEINFO(name, ipv4, netmask, mac);
+		if (arguments->sys_netmask == 1)
+			TELLIFACEINFOSYSTEM(arguments->ifacename, arguments->self_pa, arguments->netmask, arguments->self_ha)
+		else
+			TELLIFACEINFO(arguments->ifacename, arguments->self_pa, arguments->netmask, arguments->self_ha)
 		return 0;
 	}
 err:
-	ERROR_NO_INFO_FOR_IFACE(name);
+	ERROR_NO_INFO_FOR_IFACE(arguments->ifacename);
 	return 1;
 }
 
@@ -198,7 +200,7 @@ err:
 /* scan the network with arp request using nmap */
 nmap_r **nmapscan(struct arguments *arguments)
 {
-	char command[128];
+	char command[256];
 	int is_first_scan = is_mac_empty(arguments->gateway_ha); // check wether the gateway ha is empty or not unlikely HA is 0:0:0...
 	FILE *fd = NULL;
 	pthread_t thread; /* used to print hang on to stdout */
@@ -207,7 +209,8 @@ nmap_r **nmapscan(struct arguments *arguments)
 
 	/* this ISNT portable at all but give me a simpler anwser than what's on this thread and i put it
 	https://stackoverflow.com/questions/6657475/netmask-conversion-to-cidr-format-in-c */
-	snprintf(command, 128, "nmap -PR -sn -n %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
+	snprintf(command, 256, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
+		arguments->nmapflags == NULL ? "" : arguments->nmapflags,
 		arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],
 		arguments->gateway_pa[2] & arguments->netmask[2], arguments->gateway_pa[3] & arguments->netmask[3],
 		__builtin_popcount(*(uint32_t*)arguments->netmask)

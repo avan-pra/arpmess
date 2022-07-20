@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdlib.h>
 #include "utils.h"
 #include "struct.h"
 
@@ -9,6 +10,7 @@ int main(int argc, char **argv)
 	int action;
 
 	arguments.ppm = 12; /* default value of packet sent per minute */
+	arguments.sys_netmask = 1;
 	argparse(argc, argv, &arguments);
 
 	if (getuid() != 0)
@@ -20,7 +22,7 @@ int main(int argc, char **argv)
 	if (get_network_interface(arguments.ifacename, arguments.gateway_pa) != 0)
 		goto err;//error no iface found
 	/* get self ipv4, self mac addr, netmask of the network */
-	if (get_network_interface_addresses(arguments.ifacename, arguments.self_pa, arguments.self_ha, arguments.netmask) != 0)
+	if (get_network_interface_addresses(&arguments) != 0)
 		goto err;//error no hardware addr or protocol address for specified interface
 
 	/* the target arg should be handle around here */
@@ -78,13 +80,16 @@ int main(int argc, char **argv)
 		else if (action == ACTION_EXIT)
 			break;
 	}
-
+	if (arguments.nmapflags != NULL)
+		free(arguments.nmapflags);
 	free_arp_scan(scan);
 	return 0;
 
 err:
 	if (scan)
 		free_arp_scan(scan);
+	if (arguments.nmapflags != NULL)
+		free(arguments.nmapflags);
 	ERROR_EXIT();
 	return 1;
 }

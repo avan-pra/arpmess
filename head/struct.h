@@ -48,9 +48,12 @@ typedef struct arguments
 	char ifacename[IF_NAMESIZE];
 	/* number of packets sent per minute */
 	int ppm;
+	char *nmapflags;
 	unsigned int scanamount;	/* number of result in the scan */
 	uint8_t gateway_pa[IPV4_LEN];	/* gateway protocol (IPv4) addr */
 	uint8_t gateway_ha[ETH_ALEN];	/* gateway hardware addr */
+	/* wether to use system netmask or user one defauts to 1 */
+	uint8_t sys_netmask;
 	uint8_t netmask[IPV4_LEN];	/* network mask */
 	uint8_t self_pa[IPV4_LEN];	/* sender protocol (IPv4) addr */
 	uint8_t self_ha[ETH_ALEN];	/* sender hardware addr */

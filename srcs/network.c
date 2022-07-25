@@ -159,7 +159,6 @@ void sort_scan(nmap_r **scan)
 {
 	int n = 0;
 
-	// get the lenght of the nmap scan
 	while (scan[n] != NULL)
 		++n;
 	for (int gap = n / 2; gap > 0; gap /= 2) {
@@ -169,6 +168,19 @@ void sort_scan(nmap_r **scan)
 			for (j = i; j >= gap && *(uint32_t*)(scan[j - gap]->pa) > *(uint32_t*)(temp->pa); j -= gap)
 				scan[j] = scan[j - gap];
 			scan[j] = temp;
+		}
+	}
+}
+
+void remove_scan_duplicate(nmap_r **scan)
+{
+	for (size_t i = 0; scan[i + 1] != NULL; ++i) {
+		if (*(uint32_t*)(scan[i]->pa) == *(uint32_t*)(scan[i + 1]->pa)) {
+			free(scan[i]);
+			for (size_t j = i; scan[j] != NULL; ++j) {
+				scan[j] = scan[j + 1];
+			}
+			--i;
 		}
 	}
 }
@@ -262,7 +274,10 @@ nmap_r **nmapscan(struct arguments *arguments)
 	scan_status = 0;
 	pthread_join(thread, NULL);
 
+	/* sort le scan */
 	sort_scan(scan);
+	/* enleve les doublons du scan */
+	remove_scan_duplicate(scan);
 
 	/* retreive the gateway HA from the scan and get the amount of entry */ 
 	size_t i;

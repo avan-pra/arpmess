@@ -36,7 +36,6 @@ arpmess -- A kickthemout like rewrite in C
 Please open an issue if you have any problem.  
 
 # TODO
-- handle -t target options
+- finish handling -t target options
 - handle selection of host
 - allow a mitm attack
-- sort ip in the scan**

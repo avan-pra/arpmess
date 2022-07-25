@@ -154,6 +154,25 @@ void free_arp_scan(nmap_r **scan)
 		free(scan);
 }
 
+/* shell sort on the nmap scan */
+void sort_scan(nmap_r **scan)
+{
+	int n = 0;
+
+	// get the lenght of the nmap scan
+	while (scan[n] != NULL)
+		++n;
+	for (int gap = n / 2; gap > 0; gap /= 2) {
+		for (int i = gap; i < n; i += 1) {
+			nmap_r* temp = scan[i];
+			int j;
+			for (j = i; j >= gap && *(uint32_t*)(scan[j - gap]->pa) > *(uint32_t*)(temp->pa); j -= gap)
+				scan[j] = scan[j - gap];
+			scan[j] = temp;
+		}
+	}
+}
+
 nmap_r **parse_arp_scan(FILE *fd)
 {
 	char *line = NULL;
@@ -200,7 +219,7 @@ err:
 /* scan the network with arp request using nmap */
 nmap_r **nmapscan(struct arguments *arguments)
 {
-	char command[256];
+	char command[4096];
 	int is_first_scan = is_mac_empty(arguments->gateway_ha); // check wether the gateway ha is empty or not unlikely HA is 0:0:0...
 	FILE *fd = NULL;
 	pthread_t thread; /* used to print hang on to stdout */
@@ -209,13 +228,26 @@ nmap_r **nmapscan(struct arguments *arguments)
 
 	/* this ISNT portable at all but give me a simpler anwser than what's on this thread and i put it
 	https://stackoverflow.com/questions/6657475/netmask-conversion-to-cidr-format-in-c */
-	snprintf(command, 256, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
-		arguments->nmapflags == NULL ? "" : arguments->nmapflags,
-		arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],
-		arguments->gateway_pa[2] & arguments->netmask[2], arguments->gateway_pa[3] & arguments->netmask[3],
-		__builtin_popcount(*(uint32_t*)arguments->netmask)
-	);
-	TELLSCAN(arguments->gateway_pa, arguments->netmask);
+	if (arguments->target_list == NULL) {
+		snprintf(command, 4096, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
+			arguments->nmapflags == NULL ? "" : arguments->nmapflags,
+			arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],
+			arguments->gateway_pa[2] & arguments->netmask[2], arguments->gateway_pa[3] & arguments->netmask[3],
+			__builtin_popcount(*(uint32_t*)arguments->netmask)
+		);
+		TELLSCAN(arguments->gateway_pa, arguments->netmask);
+	}
+	else {
+		snprintf(command, 4096, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu %hhu.%hhu.%hhu.%hhu %s 2>/dev/null",
+			arguments->nmapflags == NULL ? "" : arguments->nmapflags,
+			arguments->gateway_pa[0], arguments->gateway_pa[1],
+			arguments->gateway_pa[2], arguments->gateway_pa[3],
+			arguments->self_pa[0], arguments->self_pa[1],
+			arguments->self_pa[2], arguments->self_pa[3],
+			arguments->target_list
+		);
+		TELLSCANTARGET(arguments->gateway_pa, arguments->target_list);
+	}
 
 	fd = popen(command, "r");
 	// fd = fopen("res", "r");
@@ -229,6 +261,8 @@ nmap_r **nmapscan(struct arguments *arguments)
 
 	scan_status = 0;
 	pthread_join(thread, NULL);
+
+	sort_scan(scan);
 
 	/* retreive the gateway HA from the scan and get the amount of entry */ 
 	size_t i;

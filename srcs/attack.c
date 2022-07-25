@@ -136,9 +136,10 @@ int start_attack_all(const struct arguments *arguments, nmap_r **scan)
 	}
 	/* wait for thread to finish */
 	for (size_t j = 0; j < arguments->scanamount - 2; ++j) {
-		if (scan[j]->gateway == 0 && scan[j]->self == 0)
+		if (scan[j]->gateway == 0 && scan[j]->self == 0) {
 			pthread_join(thread[j], NULL);
-		free(argp[j]);
+			free(argp[j]);
+		}
 	}
 	stop_signal();
 	g_stop = 1;

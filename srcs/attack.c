@@ -55,14 +55,17 @@ static void *arpthread(void *argp)
 	nmap_r *target = arg->target;
 	SOCKET iface = arg->iface;
 	struct timespec start = {0x0}, stop = { 0x0 };
-	float time_to_wait = ((60 / arguments->ppm) * 1000000);
-
+	uint64_t time_to_wait = 0;
 	unsigned char payload[42] = { 0x0 };
 	eth *eth_hdr = (eth*)payload;
 	arp *arp_hdr = (arp*)(payload + ETH_HLEN);
 	struct sockaddr_ll ifaceinfo = { 0x0 };
 	// socklen_t ifaceinfolen;
 	size_t rlen;
+
+	time_to_wait = 60;
+	time_to_wait *= 1000000000;
+	time_to_wait /= arguments->ppm;
 
 	copy_mac(eth_hdr->dest_addr, target->ha);	/* 6 bytes dest addr */
 	copy_mac(eth_hdr->src_addr, arguments->self_ha);	/* 6 bytes src addr (us) */
@@ -91,14 +94,17 @@ static void *arpthread(void *argp)
 	// not initialiszing the structure allow us to send a reply packet the 1st time we enter the loop
 	while (g_stop == 1) {
 		clock_gettime(CLOCK_REALTIME, &stop);
-		if ((stop.tv_sec - start.tv_sec) * 1000000 + (stop.tv_sec - start.tv_sec) > time_to_wait)
+		uint64_t t = (stop.tv_sec - start.tv_sec); // rename the var
+		t *= 1000000000;
+		t += stop.tv_nsec - start.tv_nsec;
+		if (t > time_to_wait)
 		{
 			rlen = sendto(iface, payload, ETH_HLEN + ARP_HLEN, 0, (struct sockaddr*)&ifaceinfo, sizeof(ifaceinfo));
 			if (rlen != ETH_HLEN + ARP_HLEN)
 				{ ERROR_SEND(); goto err; }
 			clock_gettime(CLOCK_REALTIME, &start);
 		}
-		sleep(0.05);
+		usleep(1);
 	}
 	return NULL;
 err:

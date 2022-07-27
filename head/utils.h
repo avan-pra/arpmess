@@ -36,6 +36,6 @@ int stop_signal();
 /* attack.c */
 int start_attack_one(const struct arguments *arguments, nmap_r *scan);
 int start_attack_all(const struct arguments *arguments, nmap_r **scan);
-
+int arpspoof(const struct arguments *arguments, nmap_r *target);
 
 #endif

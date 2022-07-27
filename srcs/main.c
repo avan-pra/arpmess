@@ -63,6 +63,18 @@ int main(int argc, char **argv)
 			else
 				NETWORK_EMPTY();
 		}
+		/* 4 */
+		else if (action == ACTION_SPOOF) {
+			ERROR_NO_YET_IMPLEMENTED();
+			long long hostidx = ask_index(scan, &arguments);
+			if (hostidx == ACTION_EXIT)
+				break;
+			if (hostidx == ACTION_RETURN)
+				continue;
+			if (arpspoof(&arguments, scan[hostidx]) != 0)
+				goto err;
+			continue;
+		}
 		/* L */
 		else if (action == ACTION_LIST) {
 			PRINT_SCAN_LIST(scan);

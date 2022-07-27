@@ -77,8 +77,9 @@ int ask_action()
 		fgets(buffer, 0x40, stdin);
 		action = toupper(buffer[0]);
 		if (action == '1' || action == '2'
-		|| action == '3' || action == 'E'
-		|| action == 'S' || action == 'L')
+		|| action == '3' || action == '4'
+		|| action == 'E' || action == 'S'
+		||action == 'L')
 			break;
 		ERROR_UNRECOGNIZED_CHAR_ASK(action);
 		ASK_ATTACK_TYPE();

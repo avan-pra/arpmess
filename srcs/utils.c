@@ -114,6 +114,27 @@ nmap_r *get_gateway_from_scan(nmap_r **scan)
 	return NULL;
 }
 
+/* check if we can perform the mitm attack, notify the user if not */
+int mitm_requirements()
+{
+	FILE *fd;
+	char c[2];
+
+	if (!(fd = fopen("/proc/sys/net/ipv4/ip_forward" , "r")))
+		goto err;
+	fgets(c , 2, fd);
+	fclose(fd);
+
+	if (c[0] == '0') {
+		ERROR_NO_IP_FORWARD();
+		return 1;
+	}
+	else if (c[0] == '1')
+		return 0;
+err:
+	return -1;
+}
+
 static void free_manu_db(manuf_db **db)
 {
 	for (size_t i = 0; db && db[i] != NULL; ++i) {

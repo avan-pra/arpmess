@@ -93,7 +93,8 @@
 # define ERROR_SEND() { fprintf(stderr, "%srsendto() returned -1\n", SAMPLE_ERROR); }
 # define ERROR_RECV() { fprintf(stderr, "%srecvfrom() returned -1\n", SAMPLE_ERROR); }
 # define ERROR_PACKET_PER_MINUTE() { fprintf(stderr, "%sAmount of packets sent per minute must be >= 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm); }
-# define NETWORK_EMPTY() { fprintf(stderr, "\n%s"ANSI_COLOR_RED"ALERT: only you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning"ANSI_COLOR_RESET"\n", SAMPLE_ERROR); }
+# define NETWORK_EMPTY() { fprintf(stderr, "\n%sWARNING: only you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning\n", SAMPLE_ERROR); }
+# define ERROR_NO_IP_FORWARD() { fprintf(stderr, "\n%sWARNING: ip forward is not enable, run `echo 1 | tee /proc/sys/net/ipv4/ip_forward` in a root shell to perform the mitm\n", SAMPLE_ERROR); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\

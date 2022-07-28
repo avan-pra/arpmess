@@ -65,6 +65,8 @@ int main(int argc, char **argv)
 		}
 		/* 4 */
 		else if (action == ACTION_SPOOF) {
+			if (mitm_requirements() == -1) // only on critical error returns -1
+				goto err;
 			long long hostidx = ask_index(scan, &arguments);
 			if (hostidx == ACTION_EXIT)
 				break;

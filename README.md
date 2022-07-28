@@ -7,7 +7,13 @@ This tool was greatly inspired by [kickthemout](https://github.com/k4m4/kickthem
 ```
 $ make vendor
 $ make
+# echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+# iptables --policy FORWARD ACCEPT
+# ./arpmess
 ```
+
+Step 3 and 4 are only needed if you want to perform a mitm  
+Step 3, 4 and 5 need to be run in a root shell  
 
 # Usage
 ```
@@ -24,7 +30,9 @@ arpmess -- A kickthemout like rewrite in C
                              255.255.255.0
   -p, --packets=PACKETPERMINUTE   Number of packets broadcasted per minute
                              (default: 12)
-  -t, --target=IP1,IP2       Target list YET TO BE IMPLEMENTED
+                             WARNING: 0 for unlimited, very ressource
+                             intensive
+  -t, --target=IP1 IP2       Target list (space separated)
   -v, --verbose              Produce verbose output USELESS AS OF NOW
   -?, --help                 Give this help list
       --usage                Give a short usage message
@@ -36,6 +44,5 @@ arpmess -- A kickthemout like rewrite in C
 Please open an issue if you have any problem.  
 
 # TODO
-- finish handling -t target options
 - handle selection of host
-- allow a mitm attack
+- check if mitm is possible before performing attack

@@ -1,5 +1,5 @@
 # arpmess
-Modify the default gateway harware address in arp table of other hosts in your network (thus denying them internet access) by performing an arp spoof attack.  
+Modify the default gateway harware address in arp table of other hosts in your network by performing an arp spoof attack.  
 
 This tool was greatly inspired by [kickthemout](https://github.com/k4m4/kickthemout) from k4m4
 

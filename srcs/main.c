@@ -65,7 +65,6 @@ int main(int argc, char **argv)
 		}
 		/* 4 */
 		else if (action == ACTION_SPOOF) {
-			ERROR_NO_YET_IMPLEMENTED();
 			long long hostidx = ask_index(scan, &arguments);
 			if (hostidx == ACTION_EXIT)
 				break;

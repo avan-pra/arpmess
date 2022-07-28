@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 				break;
 			if (hostidx == ACTION_RETURN)
 				continue;
-			if (arpspoof(&arguments, scan[hostidx]) != 0)
+			if (arpspoof(&arguments, scan, hostidx) != 0)
 				goto err;
 			continue;
 		}

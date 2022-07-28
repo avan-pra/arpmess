@@ -32,10 +32,12 @@ int fill_vendor_from_manuf_file(nmap_r **scan);
 void PRINT_SCAN_LIST(nmap_r **scan);
 int start_signal();
 int stop_signal();
+nmap_r *get_self_from_scan(nmap_r **scan);
+nmap_r *get_gateway_from_scan(nmap_r **scan);
 
 /* attack.c */
 int start_attack_one(const struct arguments *arguments, nmap_r *scan);
 int start_attack_all(const struct arguments *arguments, nmap_r **scan);
-int arpspoof(const struct arguments *arguments, nmap_r *target);
+int arpspoof(const struct arguments *arguments, nmap_r **target, long long victimidx);
 
 #endif

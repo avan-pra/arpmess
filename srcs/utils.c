@@ -96,6 +96,24 @@ int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN])
 	return 1;
 }
 
+nmap_r *get_self_from_scan(nmap_r **scan)
+{
+	for (size_t i = 0; scan[i] != NULL; ++i) {
+		if (scan[i]->self == 1)
+			return scan[i];
+	}
+	return NULL;
+}
+
+nmap_r *get_gateway_from_scan(nmap_r **scan)
+{
+	for (size_t i = 0; scan[i] != NULL; ++i) {
+		if (scan[i]->gateway == 1)
+			return scan[i];
+	}
+	return NULL;
+}
+
 static void free_manu_db(manuf_db **db)
 {
 	for (size_t i = 0; db && db[i] != NULL; ++i) {

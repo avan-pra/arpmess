@@ -40,7 +40,7 @@ char get_first_non_whitespace(char *buf)
 	return 0;
 }
 
-int ask_index_list(nmap_r **scan, const struct arguments *arguments, char **buf)
+int ask_index_list(nmap_r **scan, char **buf)
 {
 	size_t size = 0;
 	char c;

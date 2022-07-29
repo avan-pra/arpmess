@@ -127,7 +127,7 @@ static int isidxinlist(size_t idx, char *list)
 	if (!(listdup = strdup(list)))
 		{ ERROR_MALLOC(); return -1; }
 	while ((h = strtok_r((h == NULL ? listdup : NULL), ",", &saveptr)) != NULL) {
-		if (atol(h) == idx) {
+		if ((size_t)atol(h) == idx) {
 			ret = 1;
 			break;
 		}

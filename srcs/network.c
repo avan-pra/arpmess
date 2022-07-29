@@ -189,7 +189,6 @@ void remove_scan_duplicate(nmap_r **scan)
 static nmap_r **parse_target_cmdline(char *str, struct arguments *arguments)
 {
 	char *h = NULL, *saveptr, *line = NULL;
-	size_t size = 0;
 	uint32_t idx = 0;
 	nmap_r **scan = NULL;
 	nmap_r *current = NULL;

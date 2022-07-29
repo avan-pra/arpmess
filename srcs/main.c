@@ -18,7 +18,7 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 
 		/* 1 */
 		if (action == ACTION_KICK_SOME) {
-			long long hostidx = ask_index_list(*scan, arguments, &list);
+			long long hostidx = ask_index_list(*scan, &list);
 			if (hostidx == 1) // malloc error
 				goto err;
 			if (hostidx == ACTION_EXIT) {
@@ -44,7 +44,7 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 		else if (action == ACTION_SPOOF_SOME) {
 			if (mitm_requirements() == -1) // only on critical error returns -1
 				goto err;
-			long long hostidx = ask_index_list(*scan, arguments, &list);
+			long long hostidx = ask_index_list(*scan, &list);
 			if (hostidx == 1) // malloc error
 				goto err;
 			if (hostidx == ACTION_EXIT) {
@@ -128,7 +128,6 @@ int main(int argc, char **argv)
 {
 	struct arguments arguments = { 0x0 };
 	nmap_r **scan = NULL; /* hold result of the arp nmap scan */
-	int action;
 
 	arguments.ppm = 12; /* default value of packet sent per minute */
 	arguments.sys_netmask = 1;

@@ -17,7 +17,7 @@ void free_arp_scan(nmap_r **scan);
 /* interactive.c */
 int ask_user_for_gateway();
 int ask_action();
-long long ask_index(nmap_r **scan, const struct arguments *arguments);
+int ask_index_list(nmap_r **scan, const struct arguments *arguments, char **buf);
 
 /* utils.c */
 int is_hbroadcast_addr(const uint8_t addr[ETH_ALEN]);
@@ -38,8 +38,7 @@ int mitm_requirements(); // check if a mitm attack is possible
 int IsPrivateAddress(uint32_t ip);
 
 /* attack.c */
-int start_attack_one(const struct arguments *arguments, nmap_r *scan);
-int start_attack_all(const struct arguments *arguments, nmap_r **scan);
-int arpspoof(const struct arguments *arguments, nmap_r **target, long long victimidx);
+int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *list);
+int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list);
 
 #endif

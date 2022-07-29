@@ -6,47 +6,65 @@
 static int interactivemode(nmap_r **scan, struct arguments *arguments)
 {
 	int action;
+	char *list = NULL; // malloc input of user to attack 1,2,3 etc
 
 	while (1)
 	{
 		action = ask_action();
+		if (list != NULL) {
+			free(list);
+			list = NULL;
+		}
 
 		/* 1 */
-		if (action == ACTION_ONE) {
-			long long hostidx = ask_index(scan, arguments);
-			if (hostidx == ACTION_EXIT)
+		if (action == ACTION_KICK_SOME) {
+			long long hostidx = ask_index_list(scan, arguments, &list);
+			if (hostidx == 1) // malloc error
+				goto err;
+			if (hostidx == ACTION_EXIT) {
+				free(list);
 				break;
+			}
 			if (hostidx == ACTION_RETURN)
 				continue;
-			if (start_attack_one(arguments, scan[hostidx]) != 0)
+			if (start_attack_some(arguments, scan, list) != 0)
 				goto err;
 			continue;
 		}
 		/* 2 */
-		else if (action == ACTION_SOME) {
-			ERROR_NO_YET_IMPLEMENTED();
-		}
-		/* 3 */
-		else if (action == ACTION_ALL) {
+		else if (action == ACTION_KICK_ALL) {
 			if (arguments->scanamount - 2 > 0) {
-				if (start_attack_all(arguments, scan) != 0)
+				if (start_attack_some(arguments, scan, NULL) != 0)
 					goto err;
 			}
 			else
 				NETWORK_EMPTY();
 		}
-		/* 4 */
-		else if (action == ACTION_SPOOF) {
+		/* 3 */
+		else if (action == ACTION_SPOOF_SOME) {
 			if (mitm_requirements() == -1) // only on critical error returns -1
 				goto err;
-			long long hostidx = ask_index(scan, arguments);
-			if (hostidx == ACTION_EXIT)
+			long long hostidx = ask_index_list(scan, arguments, &list);
+			if (hostidx == 1) // malloc error
+				goto err;
+			if (hostidx == ACTION_EXIT) {
+				free(list);
 				break;
+			}
 			if (hostidx == ACTION_RETURN)
 				continue;
-			if (arpspoof(arguments, scan, hostidx) != 0)
+			if (arpspoof_some(arguments, scan, list) != 0)
 				goto err;
 			continue;
+		}
+		/* 4 */
+		else if (action == ACTION_SPOOF_ALL) {
+			if (arguments->scanamount - 2 > 0) {
+				if (arpspoof_some(arguments, scan, NULL) != 0)
+					goto err;
+			}
+			else
+				NETWORK_EMPTY();
 		}
 		/* L */
 		else if (action == ACTION_LIST) {
@@ -74,7 +92,25 @@ static int kickmode(nmap_r **scan, struct arguments *arguments)
 {
 	if (arguments->scanamount - 2 > 0) {
 		printf("\n");
-		if (start_attack_all(arguments, scan) != 0)
+		if (start_attack_some(arguments, scan, NULL) != 0)
+			goto err;
+	}
+	else if (arguments->target_list != NULL) {
+		ERROR_NO_TARGET_SUPPLIED();
+	}
+	else {
+		NETWORK_EMPTY();
+	}
+	return 0;
+err:
+	return 1;
+}
+
+static int spoofmode(nmap_r **scan, struct arguments *arguments)
+{
+	if (arguments->scanamount - 2 > 0) {
+		printf("\n");
+		if (arpspoof_some(arguments, scan, NULL) != 0)
 			goto err;
 	}
 	else if (arguments->target_list != NULL) {
@@ -134,8 +170,14 @@ int main(int argc, char **argv)
 	}
 
 	if (arguments.mode == SPOOF) {
-		ERROR_NO_YET_IMPLEMENTED();
+		if (arguments.target_list != NULL) {
+			if (spoofmode(scan, &arguments) != 0)
+				goto err;
+		}
+		else
+			ERROR_NO_TARGET_SUPPLIED();
 	}
+
 
 	if (arguments.nmapflags != NULL)
 		free(arguments.nmapflags);

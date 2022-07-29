@@ -40,39 +40,25 @@ char get_first_non_whitespace(char *buf)
 	return 0;
 }
 
-long long ask_index(nmap_r **scan, const struct arguments *arguments)
+int ask_index_list(nmap_r **scan, const struct arguments *arguments, char **buf)
 {
-	long long target;
-	char buffer[0x40];
+	size_t size = 0;
 	char c;
 
-	printf("\n%sChoose an host from the list:\n", SAMPLE_INFO);
+	*buf = NULL;
+	printf("\n%sChoose somes hosts from the list (comma separated if multiple):\n", SAMPLE_INFO);
 	PRINT_SCAN_LIST(scan);
 	printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
-	while (1) {
-		fgets(buffer, 0x40, stdin);
-		target = atoll(buffer);
-		c = toupper(get_first_non_whitespace(buffer));
-		if (c == 'E')
-			return ACTION_EXIT;
-		if (c == 'R')
-			return ACTION_RETURN;
-		if (((c >= '0' && c <= '9') || c == '+' || c == '-') && target >= 0 && target < arguments->scanamount && scan[target]->gateway == 0 && scan[target]->self == 0)
-			break;
-		if (((c >= '0' && c <= '9') || c == '+' || c == '-') && target >= 0 && target < arguments->scanamount && (scan[target]->gateway == 0 || scan[target]->self == 0))
-			ERROR_CANT_SELECT_SELF_OR_GATEWAY();
-
-		if (((c >= '0' && c <= '9') || c == '+' || c == '-'))
-			ERROR_UNRECOGNIZED_LONG_ASK(target)
-		else
-			ERROR_UNRECOGNIZED_CHAR_ASK(c);
-		printf("\n%sChoose an host from the list:\n\n", SAMPLE_INFO);
-		PRINT_SCAN_LIST(scan);
-		printf("\n\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"R"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Return"ANSI_COLOR_RESET"\n\
-\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\n"PROMPT);
-	}
-	return target;
+	getline(buf, &size, stdin);
+	if (*buf == NULL)
+		{ ERROR_MALLOC(); return 1; }
+	c = toupper(get_first_non_whitespace(*buf));
+	if (c == 'E')
+		return ACTION_EXIT;
+	if (c == 'R')
+		return ACTION_RETURN;
+	return 0;
 }
 
 /* attack one, refresh, etc... */

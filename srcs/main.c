@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "struct.h"
 
-static int interactivemode(nmap_r **scan, struct arguments *arguments)
+static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 {
 	int action;
 	char *list = NULL; // malloc input of user to attack 1,2,3 etc
@@ -18,7 +18,7 @@ static int interactivemode(nmap_r **scan, struct arguments *arguments)
 
 		/* 1 */
 		if (action == ACTION_KICK_SOME) {
-			long long hostidx = ask_index_list(scan, arguments, &list);
+			long long hostidx = ask_index_list(*scan, arguments, &list);
 			if (hostidx == 1) // malloc error
 				goto err;
 			if (hostidx == ACTION_EXIT) {
@@ -27,14 +27,14 @@ static int interactivemode(nmap_r **scan, struct arguments *arguments)
 			}
 			if (hostidx == ACTION_RETURN)
 				continue;
-			if (start_attack_some(arguments, scan, list) != 0)
+			if (start_attack_some(arguments, *scan, list) != 0)
 				goto err;
 			continue;
 		}
 		/* 2 */
 		else if (action == ACTION_KICK_ALL) {
 			if (arguments->scanamount - 2 > 0) {
-				if (start_attack_some(arguments, scan, NULL) != 0)
+				if (start_attack_some(arguments, *scan, NULL) != 0)
 					goto err;
 			}
 			else
@@ -44,7 +44,7 @@ static int interactivemode(nmap_r **scan, struct arguments *arguments)
 		else if (action == ACTION_SPOOF_SOME) {
 			if (mitm_requirements() == -1) // only on critical error returns -1
 				goto err;
-			long long hostidx = ask_index_list(scan, arguments, &list);
+			long long hostidx = ask_index_list(*scan, arguments, &list);
 			if (hostidx == 1) // malloc error
 				goto err;
 			if (hostidx == ACTION_EXIT) {
@@ -53,14 +53,14 @@ static int interactivemode(nmap_r **scan, struct arguments *arguments)
 			}
 			if (hostidx == ACTION_RETURN)
 				continue;
-			if (arpspoof_some(arguments, scan, list) != 0)
+			if (arpspoof_some(arguments, *scan, list) != 0)
 				goto err;
 			continue;
 		}
 		/* 4 */
 		else if (action == ACTION_SPOOF_ALL) {
 			if (arguments->scanamount - 2 > 0) {
-				if (arpspoof_some(arguments, scan, NULL) != 0)
+				if (arpspoof_some(arguments, *scan, NULL) != 0)
 					goto err;
 			}
 			else
@@ -68,15 +68,15 @@ static int interactivemode(nmap_r **scan, struct arguments *arguments)
 		}
 		/* L */
 		else if (action == ACTION_LIST) {
-			PRINT_SCAN_LIST(scan);
+			PRINT_SCAN_LIST(*scan);
 		}
 		/* S */
 		else if (action == ACTION_SCAN) {
-			free_arp_scan(scan);
+			free_arp_scan(*scan);
 			TELLRESCAN();
-			if (!(scan = nmapscan(arguments))) 
+			if (!(*scan = nmapscan(arguments))) 
 				goto err;
-			if (fill_vendor_from_manuf_file(scan) != 0)
+			if (fill_vendor_from_manuf_file(*scan) != 0)
 				goto err;
 		}
 		/* E */
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 	TELLHEADER();
 
 	if (arguments.mode == INTERACTIVE) {
-		if (interactivemode(scan, &arguments) != 0)
+		if (interactivemode(&scan, &arguments) != 0)
 			goto err;
 	}
 

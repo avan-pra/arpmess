@@ -1,5 +1,5 @@
 # arpmess
-Modify the default gateway harware address in arp table of other hosts in your network by performing an arp spoof attack.  
+Deny internet access and sniff your local network by performing arp spoofing attacks.  
 
 This tool was greatly inspired by [kickthemout](https://github.com/k4m4/kickthemout) from k4m4
 
@@ -25,6 +25,10 @@ arpmess -- A kickthemout like rewrite in C
                              know what you are doing
   -i, --interface=INTERFACE_NAME   Specify interface to use (ex: eth0)
                              IF_NAMESIZE max
+  -m, --mode=INTERACTIVE/KICK/SPOOF
+                             Defaults to interactive, if KICK/SPOOF is
+                             selected, -t arguments MUST be specified, programm
+                             will no go in interactive mode
   -n, --netmask=CIDR         Use netmask to look for hosts instead of the
                              network one IN CIDR NOTATION ex: `-n 24` for
                              255.255.255.0
@@ -32,7 +36,8 @@ arpmess -- A kickthemout like rewrite in C
                              (default: 12)
                              WARNING: 0 for unlimited, very ressource
                              intensive
-  -t, --target=IP1 IP2       Target list (space separated)
+  -t, --target=IP1 IP2       Target list (comma separated), only valid target
+                             will be scanned
   -v, --verbose              Produce verbose output USELESS AS OF NOW
   -?, --help                 Give this help list
       --usage                Give a short usage message
@@ -44,5 +49,6 @@ arpmess -- A kickthemout like rewrite in C
 Please open an issue if you have any problem.  
 
 # TODO
-- handle selection of host
-- check if mitm is possible before performing attack
+- remove kick on and replace it by kick some
+- same for arpspoof
+- notify if packets per minute = 0, too powerful

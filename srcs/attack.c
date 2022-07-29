@@ -144,6 +144,9 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 	struct arpthreadinfo **argp;
 	int isidxinlistret;
 
+	if (arguments->ppm == 0)
+		ERROR_PPM_HIGH();
+
 	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
 		goto err;
 	TELLSOCKETSUCCESS(arguments->ifacename);
@@ -199,6 +202,9 @@ int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 	struct arpthreadinfo **argp = NULL;
 	nmap_r *gateway = get_gateway_from_scan(scan); // may segfault later on idk
 	int isidxinlistret;
+
+	if (arguments->ppm == 0)
+		ERROR_PPM_HIGH();
 
 	if ((arpsock = initiate_socket_for_arp(arguments->ifacename)) == -1)
 		goto err;

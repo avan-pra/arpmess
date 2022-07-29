@@ -103,7 +103,7 @@ typedef __uint128_t uint128_t;
 # define ERROR_TARGET_UNKNOWN_FORMAT(TARGET) { fprintf(stderr, "%sUnrecognized target %s, only private ipv4 are valid (10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)\n", SAMPLE_ERROR, TARGET); }
 # define ERROR_NO_TARGET_SUPPLIED() { fprintf(stderr, "\n%sA target list is needed for the current mode\n", SAMPLE_ERROR); }
 # define ERROR_UNKNOWN_MODE(MODE) { fprintf(stderr, "%sUnknown mode %s, uppercase ? INTERACTIVE/KICK/SPOOF\n", SAMPLE_ERROR, MODE); }
-
+# define ERROR_PPM_HIGH() { fprintf(stderr, "%sarp reply packets will be sent as fast as possible, care\n", SAMPLE_ERROR); }
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\
 \told: %d.%d.%d.%d\n\

@@ -199,7 +199,8 @@ static nmap_r **parse_target_cmdline(char *str, struct arguments *arguments)
 	arguments->self_pa[0], arguments->self_pa[1], 
 	arguments->self_pa[2], arguments->self_pa[3],
 	arguments->gateway_pa[0], arguments->gateway_pa[1],
-	arguments->gateway_pa[2], arguments->gateway_pa[3], str);
+	arguments->gateway_pa[2], arguments->gateway_pa[3],
+	(str == NULL ? "" : str));
 	if (!line)
 		goto err;
 	while ((h = strtok_r((h == NULL ? line : NULL), ",", &saveptr)) != NULL) {
@@ -285,7 +286,7 @@ nmap_r **nmapscan(struct arguments *arguments)
 
 	/* this ISNT portable at all but give me a simpler anwser than what's on this thread and i put it
 	https://stackoverflow.com/questions/6657475/netmask-conversion-to-cidr-format-in-c */
-	if (arguments->target_list == NULL) {
+	if (arguments->target_list == NULL && arguments->mode == INTERACTIVE) {
 		asprintf(&command, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
 			arguments->nmapflags == NULL ? "" : arguments->nmapflags,
 			arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],

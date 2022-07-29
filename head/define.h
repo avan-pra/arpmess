@@ -49,6 +49,9 @@
 # define ACTION_RETURN -2
 # define ACTION_SCAN -3
 # define ACTION_LIST -4
+# define INTERACTIVE 0
+# define KICK 1
+# define SPOOF 2
 
 #ifndef SO_BINDTODEVICE
 # define SO_BINDTODEVICE 0x19	/* for vscode */
@@ -96,6 +99,8 @@
 # define NETWORK_EMPTY() { fprintf(stderr, "\n%sWARNING: only you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning\n", SAMPLE_ERROR); }
 # define ERROR_NO_IP_FORWARD() { fprintf(stderr, "\n%sWARNING: ip forward is not enable, run `echo 1 | tee /proc/sys/net/ipv4/ip_forward` in a root shell to perform the mitm\n", SAMPLE_ERROR); }
 # define ERROR_TARGET_UNKNOWN_FORMAT(TARGET) { fprintf(stderr, "%sUnrecognized target %s, only private ipv4 are valid (10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)\n", SAMPLE_ERROR, TARGET); }
+# define ERROR_NO_TARGET_SUPPLIED() { fprintf(stderr, "\n%sA target list is needed for the current mode\n", SAMPLE_ERROR); }
+# define ERROR_UNKNOWN_MODE(MODE) { fprintf(stderr, "%sUnknown mode %s, uppercase ? INTERACTIVE/KICK/SPOOF\n", SAMPLE_ERROR, MODE); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\

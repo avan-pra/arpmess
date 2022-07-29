@@ -46,6 +46,7 @@ typedef struct arguments
 	int verbose;
 	char *target_list;
 	char ifacename[IF_NAMESIZE];
+	int mode; // INTERACTIVE/KICK/SPOOF
 	/* number of packets sent per minute */
 	int ppm;
 	char *nmapflags;

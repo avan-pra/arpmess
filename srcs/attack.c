@@ -98,7 +98,7 @@ static void *arpthread(void *argp)
 	// not initialiszing the structure allow us to send a reply packet the 1st time we enter the loop
 	while (g_stop == 1) {
 		clock_gettime(CLOCK_REALTIME, &stop);
-		uint64_t t = (stop.tv_sec - start.tv_sec); // rename the var
+		uint128_t t = (stop.tv_sec - start.tv_sec); // rename the var, there may be integer overflow but idfc even with ppm 60 its enough to arpspoof
 		t *= 1000000000;
 		t += stop.tv_nsec - start.tv_nsec;
 		if (t > time_to_wait)

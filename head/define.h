@@ -53,6 +53,8 @@
 # define KICK 1
 # define SPOOF 2
 
+typedef __uint128_t uint128_t;
+
 #ifndef SO_BINDTODEVICE
 # define SO_BINDTODEVICE 0x19	/* for vscode */
 #endif

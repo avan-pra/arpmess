@@ -13,15 +13,20 @@
 */
 static struct argp_option options[] =
 {
-	{ "mode", 'm', "INTERACTIVE/KICK/SPOOF", 0, "Defaults to interactive, if KICK/SPOOF is selected, -t arguments MUST be specified, programm will no go in interactive mode"},
-	{ "interface", 'i', "INTERFACE_NAME", 0, "Specify interface to use (ex: eth0) IF_NAMESIZE max", 0x0 },
-	{ "packets", 'p', "PACKETPERMINUTE", 0, "Number of packets broadcasted per minute (default: 12)\nWARNING: 0 for unlimited, very ressource intensive", 0x0 },
+	{ "mode", 'm', "INTERACTIVE/KICK/SPOOF", 0, "Defaults to INTERACTIVE, if KICK/SPOOF is selected, -t arguments MUST be specified,       ex: `-m KICK`"},
+	{ "interface", 'i', "INTERFACE_NAME", 0, "Specify interface to use ex: `-i eth0` (IF_NAMESIZE max)", 0x0 },
+	{ "packets", 'p', "PACKETPERMINUTE", 0, "Number of packets broadcasted per minute ex: `-p 24` (default: 12) WARNING: 0 for unlimited, very resource intensive", 0x0 },
 	{ "netmask", 'n', "CIDR", 0, "Use netmask to look for hosts instead of the network one IN CIDR NOTATION ex: `-n 24` for 255.255.255.0", 0x0 },
 	{ "nmapflag", 'f', "-FLAG1 -FLAG2", 0, "Add flag to nmap command \nWARNING: don't play with this option unless you know what you are doing", 0x0},
-	{ "target", 't', "IP1 IP2", 0, "Target list (comma separated), only valid target will be scanned", 0x0 },
+	{ "target", 't', "IP1,IP2", 0, "Target list (comma separated), only found target will be used by the program                     ex: `-t 192.168.43.10,192.168.43.152`", 0x0 },
 	{ "verbose", 'v', 0, 0, "Produce verbose output USELESS AS OF NOW", 0x0 },
 	{0x0}
 };
+
+/*
+** -f flag may be used to run arbitrary command, disable by setting
+** arguments->nmapflags to NULL in case 'f'
+*/
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
@@ -95,7 +100,7 @@ int argparse(int argc, char **argv, struct arguments *arguments)
 {
 static char args_doc[] = "";
 static char doc[] = \
-"arpmess -- A kickthemout like rewrite in C\
+"arpmess -- An arpspoofing software, all in one in C\
 \v\
 "IFACECOLOR"Color for interface\n\
 "IPV4COLOR"Color for ipv4\n\

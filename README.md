@@ -44,5 +44,6 @@ arpmess -- A kickthemout like rewrite in C
 Please open an issue if you have any problem.  
 
 # TODO
-- handle selection of host
-- check if mitm is possible before performing attack
+- remove kick on and replace it by kick some
+- same for arpspoof
+- notify if packets per minute = 0, too powerful

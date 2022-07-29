@@ -35,6 +35,7 @@ int stop_signal();
 nmap_r *get_self_from_scan(nmap_r **scan);
 nmap_r *get_gateway_from_scan(nmap_r **scan);
 int mitm_requirements(); // check if a mitm attack is possible
+int IsPrivateAddress(uint32_t ip);
 
 /* attack.c */
 int start_attack_one(const struct arguments *arguments, nmap_r *scan);

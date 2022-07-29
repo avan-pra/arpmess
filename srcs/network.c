@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <net/if.h>
 #include <netinet/in.h>
@@ -185,6 +186,49 @@ void remove_scan_duplicate(nmap_r **scan)
 	}
 }
 
+static nmap_r **parse_target_cmdline(char *str, struct arguments *arguments)
+{
+	char *h = NULL, *saveptr, *line = NULL;
+	size_t size = 0;
+	uint32_t idx = 0;
+	nmap_r **scan = NULL;
+	nmap_r *current = NULL;
+	uint8_t ipv4[IPV4_LEN], dummy;
+
+	asprintf(&line, "%hhu.%hhu.%hhu.%hhu,%hhu.%hhu.%hhu.%hhu,%s",
+	arguments->self_pa[0], arguments->self_pa[1], 
+	arguments->self_pa[2], arguments->self_pa[3],
+	arguments->gateway_pa[0], arguments->gateway_pa[1],
+	arguments->gateway_pa[2], arguments->gateway_pa[3], str);
+	if (!line)
+		goto err;
+	while ((h = strtok_r((h == NULL ? line : NULL), ",", &saveptr)) != NULL) {
+		if (sscanf(h, "%hhu.%hhu.%hhu.%hhu%c", &ipv4[0], &ipv4[1], &ipv4[2], &ipv4[3], &dummy) == 4 && IsPrivateAddress(ntohl(*(uint32_t*)ipv4))) {
+			if (!(scan = realloc(scan, (idx + 2) * sizeof(nmap_r*))))
+				{ ERROR_MALLOC(); goto err; }
+			scan[idx + 1] = NULL;
+			if (!(scan[idx] = calloc(1, sizeof(nmap_r))))
+				{ ERROR_MALLOC(); goto err; }
+			scan[idx]->idx = idx;
+			current = scan[idx];
+			*(uint32_t*)current->pa = *(uint32_t*)ipv4;	
+			++idx;
+		}
+		else
+			ERROR_TARGET_UNKNOWN_FORMAT(h);
+	}
+	free(line);
+	if (scan == NULL)
+		ERROR_SCAN();
+	return scan;
+
+err:
+	if (line)
+		free(line);
+	free_arp_scan(scan);
+	return NULL;
+}
+
 nmap_r **parse_arp_scan(FILE *fd)
 {
 	char *line = NULL;
@@ -212,6 +256,7 @@ nmap_r **parse_arp_scan(FILE *fd)
 			if (current == NULL)
 				{ ERROR_NMAP(line); goto err; }
 			sscanf(line, "MAC Address: %hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &current->ha[0], &current->ha[1], &current->ha[2], &current->ha[3],  &current->ha[4], &current->ha[5]);
+			current->known_ha = 1;
 			current = NULL;
 		}
 		free(line);
@@ -231,37 +276,55 @@ err:
 /* scan the network with arp request using nmap */
 nmap_r **nmapscan(struct arguments *arguments)
 {
-	char command[4096];
+	char *command = NULL, *tempcmd = NULL;
 	int is_first_scan = is_mac_empty(arguments->gateway_ha); // check wether the gateway ha is empty or not unlikely HA is 0:0:0...
 	FILE *fd = NULL;
 	pthread_t thread; /* used to print hang on to stdout */
 	int scan_status = 1;
-	nmap_r **scan = NULL; /* hold result of the arp nmap scan */
+	nmap_r **scan = NULL, **tempscan = NULL; /* hold result of the arp nmap scan */
 
 	/* this ISNT portable at all but give me a simpler anwser than what's on this thread and i put it
 	https://stackoverflow.com/questions/6657475/netmask-conversion-to-cidr-format-in-c */
 	if (arguments->target_list == NULL) {
-		snprintf(command, 4096, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
+		asprintf(&command, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
 			arguments->nmapflags == NULL ? "" : arguments->nmapflags,
 			arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],
 			arguments->gateway_pa[2] & arguments->netmask[2], arguments->gateway_pa[3] & arguments->netmask[3],
 			__builtin_popcount(*(uint32_t*)arguments->netmask)
 		);
+		if (!command)
+			{ ERROR_MALLOC(); goto err; }
 		TELLSCAN(arguments->gateway_pa, arguments->netmask);
 	}
 	else {
-		snprintf(command, 4096, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu %hhu.%hhu.%hhu.%hhu %s 2>/dev/null",
-			arguments->nmapflags == NULL ? "" : arguments->nmapflags,
-			arguments->gateway_pa[0], arguments->gateway_pa[1],
-			arguments->gateway_pa[2], arguments->gateway_pa[3],
-			arguments->self_pa[0], arguments->self_pa[1],
-			arguments->self_pa[2], arguments->self_pa[3],
-			arguments->target_list
-		);
-		TELLSCANTARGET(arguments->gateway_pa, arguments->target_list);
+		if (!(tempscan = parse_target_cmdline(arguments->target_list, arguments)))
+			goto err;
+		asprintf(&command, "nmap -sn -n %s", arguments->nmapflags == NULL ? "" : arguments->nmapflags);
+		if (!command)
+			{ ERROR_MALLOC(); goto err; }
+		for (size_t i = 0; tempscan[i] != NULL; ++i) {
+			tempcmd = command;
+			asprintf(&command, "%s %hhu.%hhu.%hhu.%hhu",
+				command,
+				tempscan[i]->pa[0], tempscan[i]->pa[1],
+				tempscan[i]->pa[2], tempscan[i]->pa[3]
+			);
+			free(tempcmd);
+			if (!command)
+				{ ERROR_MALLOC(); goto err; }
+		}
+		tempcmd = command;
+		asprintf(&command, "%s 2>/dev/null", command);
+		free(tempcmd);
+		if (!command)
+			{ ERROR_MALLOC(); goto err; }
+		free_arp_scan(tempscan);
+		// TELLSCANTARGET(arguments->gateway_pa, arguments->target_list);
 	}
 
+	printf("%s\n", command);
 	fd = popen(command, "r");
+	free(command);
 	// fd = fopen("res", "r");
 	if (!fd)
 		{ ERROR_POPEN(); goto err; }
@@ -284,13 +347,12 @@ nmap_r **nmapscan(struct arguments *arguments)
 	for (i = 0; scan[i] != NULL; ++i) {
 		if (is_ipv4_equal(scan[i]->pa, arguments->gateway_pa)) {
 			scan[i]->gateway = 1;
-			for (int j = 0; j < ETH_ALEN; ++j)
-				arguments->gateway_ha[j] = scan[i]->ha[j];
+			copy_mac(arguments->gateway_ha, scan[i]->ha);
 		}
 		if (is_ipv4_equal(scan[i]->pa, arguments->self_pa)) {
 			scan[i]->self = 1;
-			for (int j = 0; j < ETH_ALEN; ++j)
-				scan[i]->ha[j] = arguments->self_ha[j];
+			scan[i]->known_ha = 1;
+			copy_mac(scan[i]->ha, arguments->self_ha);
 		}
 	}
 	arguments->scanamount = i;

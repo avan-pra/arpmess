@@ -25,8 +25,7 @@ int main(int argc, char **argv)
 	if (get_network_interface_addresses(&arguments) != 0)
 		goto err;//error no hardware addr or protocol address for specified interface
 
-	/* the target arg should be handle around here */
-	/* arguments.target_list == NULL */
+	/* will only scan if no target are specified */
 	if (!(scan = nmapscan(&arguments))) 
 		goto err;
 

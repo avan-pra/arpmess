@@ -95,6 +95,7 @@
 # define ERROR_PACKET_PER_MINUTE() { fprintf(stderr, "%sAmount of packets sent per minute must be >= 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm); }
 # define NETWORK_EMPTY() { fprintf(stderr, "\n%sWARNING: only you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning\n", SAMPLE_ERROR); }
 # define ERROR_NO_IP_FORWARD() { fprintf(stderr, "\n%sWARNING: ip forward is not enable, run `echo 1 | tee /proc/sys/net/ipv4/ip_forward` in a root shell to perform the mitm\n", SAMPLE_ERROR); }
+# define ERROR_TARGET_UNKNOWN_FORMAT(TARGET) { fprintf(stderr, "%sUnrecognized target %s, only private ipv4 are valid (10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)\n", SAMPLE_ERROR, TARGET); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\

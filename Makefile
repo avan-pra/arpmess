@@ -2,7 +2,7 @@ NAME = arpmess
 
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror -I$(HEAD_DIR) -lpthread -lm
+CFLAGS = -I$(HEAD_DIR) -lpthread -lm
 
 HEAD_DIR = ./head/
 

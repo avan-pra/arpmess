@@ -64,6 +64,8 @@ typedef struct nmap_t
 	uint32_t idx;
 	uint8_t pa[IPV4_LEN];
 	uint8_t ha[ETH_ALEN];
+	/* wether we know the ha or not, 1 if known */
+	uint8_t known_ha;
 	/* is the current result the gateway ? */
 	uint8_t gateway;
 	/* is the current result us ? */

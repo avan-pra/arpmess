@@ -322,7 +322,6 @@ nmap_r **nmapscan(struct arguments *arguments)
 		// TELLSCANTARGET(arguments->gateway_pa, arguments->target_list);
 	}
 
-	printf("%s\n", command);
 	fd = popen(command, "r");
 	free(command);
 	// fd = fopen("res", "r");

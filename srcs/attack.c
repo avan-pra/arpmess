@@ -142,10 +142,11 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 	SOCKET iface = -1;
 	pthread_t *thread = NULL;
 	struct arpthreadinfo **argp;
+	size_t nthreadcreated = 0; // amount of thread that have been created
 	int isidxinlistret;
 
 	if (turn_off_ip_packet_forward() != 0)
-		goto err;
+		{ WARNING_CANT_MODIFY_IP_FORWARD(); /* goto err; */ }
 
 	if (arguments->ppm == 0)
 		ERROR_PPM_HIGH();
@@ -173,6 +174,7 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 			argp[j]->target = scan[i];
 			pthread_create(&thread[j], NULL, arpthread, argp[j]);
 			++j;
+			nthreadcreated = j;
 		}
 	}
 	/* wait for thread to finish */
@@ -186,6 +188,10 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 	g_stop = 1;
 	free(thread);
 	free(argp);
+
+	if (nthreadcreated == 0) {
+		WARNING_NO_THREADS_CREATED();
+	}
 
 	TELLSTOPATTACK();
 
@@ -205,10 +211,11 @@ int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 	pthread_t *thread = NULL;
 	struct arpthreadinfo **argp = NULL;
 	nmap_r *gateway = get_gateway_from_scan(scan); // may segfault later on idk
+	size_t nthreadcreated = 0; // amount of thread that have been created
 	int isidxinlistret;
 
 	if (turn_on_ip_packet_forward() != 0)
-		goto err;
+		{ WARNING_CANT_MODIFY_IP_FORWARD(); /* goto err; */ }
 
 	if (arguments->ppm == 0)
 		ERROR_PPM_HIGH();
@@ -253,6 +260,7 @@ int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 			pthread_create(&thread[j], NULL, arpthread, argp[j]);
 			pthread_create(&thread[j + 1], NULL, arpthread, argp[j + 1]);
 			j += 2;
+			nthreadcreated = j;
 		}
 	}
 
@@ -265,7 +273,9 @@ int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 	}
 
 	g_stop = 1;
-	TELLRESTORINGMAC();
+	if (nthreadcreated != 0) {
+		TELLRESTORINGMAC();
+	}
 
 	/*
 	** very sketchy, arpthread() is using self_ha as the mac to spoof,
@@ -313,6 +323,11 @@ int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 	free(arggateway);
 
 	g_stop = 1;
+
+	if (nthreadcreated == 0) {
+		WARNING_NO_THREADS_CREATED();
+	}
+
 	TELLSTOPATTACK();
 
 	close(arpsock);

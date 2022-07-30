@@ -360,7 +360,7 @@ nmap_r **nmapscan(struct arguments *arguments)
 	if (is_first_scan)
 		TELLGATEWAYHA(arguments->gateway_ha);
 	if (arguments->scanamount <= 2)
-		NETWORK_EMPTY();
+		WARNING_NETWORK_EMPTY();
 	return scan;
 
 err:

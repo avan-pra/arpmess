@@ -38,7 +38,7 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 					goto err;
 			}
 			else
-				NETWORK_EMPTY();
+				WARNING_NETWORK_EMPTY();
 		}
 		/* 3 */
 		else if (action == ACTION_SPOOF_SOME) {
@@ -62,7 +62,7 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 					goto err;
 			}
 			else
-				NETWORK_EMPTY();
+				WARNING_NETWORK_EMPTY();
 		}
 		/* L */
 		else if (action == ACTION_LIST) {
@@ -97,7 +97,7 @@ static int kickmode(nmap_r **scan, struct arguments *arguments)
 		ERROR_NO_TARGET_SUPPLIED();
 	}
 	else {
-		NETWORK_EMPTY();
+		WARNING_NETWORK_EMPTY();
 	}
 	return 0;
 err:
@@ -115,7 +115,7 @@ static int spoofmode(nmap_r **scan, struct arguments *arguments)
 		ERROR_NO_TARGET_SUPPLIED();
 	}
 	else {
-		NETWORK_EMPTY();
+		WARNING_NETWORK_EMPTY();
 	}
 	return 0;
 err:

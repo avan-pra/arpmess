@@ -19,7 +19,7 @@
 #define ANSI_COLOR_BRIGHT_CYAN    "\x1b[96m"
 #define ANSI_COLOR_BRIGHT_WHITE   "\x1b[97m"
 
-#define ANSI_COLOR_256_ORANGE "\x1b[38;5;214m"
+#define ANSI_COLOR_256_ORANGE "\x1b[38;5;208m"
 #define ANSI_COLOR_256_PINK   "\x1b[38;5;198m"
 
 # define IFACECOLOR ANSI_COLOR_BRIGHT_CYAN
@@ -41,6 +41,7 @@
 # define SAMPLE_INFO "["ANSI_COLOR_BRIGHT_BLUE"*"ANSI_COLOR_RESET"] "
 # define SAMPLE_NEW "["ANSI_COLOR_BRIGHT_GREEN"+"ANSI_COLOR_RESET"] "
 # define SAMPLE_ERROR "["ANSI_COLOR_BRIGHT_RED"-"ANSI_COLOR_RESET"] "
+# define SAMPLE_WARNING "["ANSI_COLOR_256_ORANGE"~"ANSI_COLOR_RESET"] "
 # define ACTION_KICK_SOME '1'
 # define ACTION_KICK_ALL '2'
 # define ACTION_SPOOF_SOME '3'
@@ -75,8 +76,8 @@ typedef __uint128_t uint128_t;
 # define TELLSTOPATTACK() { printf("%sStopped the spoofing, returning to main menu...\n", SAMPLE_INFO); }
 # define TELLRESCAN() { printf("%sRescanning...\n", SAMPLE_INFO); }
 # define TELLRESTORINGMAC() { printf("%sRestoring arp table of the victim, ctrl+c when you feel like the arp table is restored\n", SAMPLE_INFO); }
-# define TELLACTIVATEIPFORWARD() { printf("%sIP forward was successfully activated\n", SAMPLE_INFO); }
-# define TELLDEACTIVATEIPFORWARD() { printf("%sIP forward was successfully desactivated\n", SAMPLE_INFO); }
+# define TELLACTIVATEIPFORWARD() { printf("%s/proc/sys/net/ipv4/ip_forward has been changed to 1\n", SAMPLE_INFO); }
+# define TELLDEACTIVATEIPFORWARD() { printf("%s/proc/sys/net/ipv4/ip_forward has been changed to 0\n", SAMPLE_INFO); }
 # define TELLIPFORWARDDEFAULT(C) { printf("%s/proc/sys/net/ipv4/ip_forward defaults to value: %c\n", SAMPLE_INFO, C); }
 
 # define TELLEXITING() { printf("Exiting program...\n"); }
@@ -95,19 +96,21 @@ typedef __uint128_t uint128_t;
 # define ERROR_UNRECOGNIZED_LONG_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %lld\n", SAMPLE_ERROR, INT); }
 # define ERROR_CANT_SELECT_SELF_OR_GATEWAY() { fprintf(stderr, "%sYou can't poison neither the gateway nor yourself\n", SAMPLE_ERROR); }
 # define ERROR_NO_YET_IMPLEMENTED() { fprintf(stderr, "%sThis feature hasnt been implemented yet\n", SAMPLE_ERROR); }
-# define ERROR_NO_MANUF_FILE() { fprintf(stderr, "%smanuf file not found, information about vendor won't be shown, run `make vendor` to download\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_DENIED() { fprintf(stderr, "%scould not create a raw socket\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_MODIFY_DENIED(IFACENAME) { fprintf(stderr, "%ssuccessfully create a socket but could not bind it to device %s using setsockopt()\n", SAMPLE_ERROR, IFACENAME); }
-# define ERROR_SEND() { fprintf(stderr, "%srsendto() returned -1\n", SAMPLE_ERROR); }
+# define ERROR_SEND() { fprintf(stderr, "%ssendto() returned -1\n", SAMPLE_ERROR); }
 # define ERROR_RECV() { fprintf(stderr, "%srecvfrom() returned -1\n", SAMPLE_ERROR); }
 # define ERROR_PACKET_PER_MINUTE() { fprintf(stderr, "%sAmount of packets sent per minute must be >= 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm); }
-# define NETWORK_EMPTY() { fprintf(stderr, "\n%sWARNING: only you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning\n", SAMPLE_ERROR); }
-# define ERROR_NO_IP_FORWARD() { fprintf(stderr, "\n%sWARNING: ip forward is not enable, run `echo 1 | tee /proc/sys/net/ipv4/ip_forward` in a root shell to perform the mitm\n", SAMPLE_ERROR); }
+# define ERROR_NO_IP_FORWARD() { fprintf(stderr, "%sip forward is not enable, run `echo 1 | tee /proc/sys/net/ipv4/ip_forward` in a root shell to perform the mitm\n", SAMPLE_ERROR); }
 # define ERROR_TARGET_UNKNOWN_FORMAT(TARGET) { fprintf(stderr, "%sUnrecognized target %s, only private ipv4 are valid (10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)\n", SAMPLE_ERROR, TARGET); }
 # define ERROR_NO_TARGET_SUPPLIED() { fprintf(stderr, "\n%sA target list is needed for the current mode\n", SAMPLE_ERROR); }
-# define ERROR_UNKNOWN_MODE(MODE) { fprintf(stderr, "%sUnknown mode %s, uppercase ? INTERACTIVE/KICK/SPOOF\n", SAMPLE_ERROR, MODE); }
+# define ERROR_UNKNOWN_MODE(MODE) { fprintf(stderr, "%sUnknown mode %s (INTERACTIVE/KICK/SPOOF)\n", SAMPLE_ERROR, MODE); }
 # define ERROR_PPM_HIGH() { fprintf(stderr, "%sarp reply packets will be sent as fast as possible, care\n", SAMPLE_ERROR); }
-# define ERROR_CANT_MODIFY_IP_FORWARD() { fprintf(stderr, "%s/proc/sys/net/ipv4/ip_forward can't be modify for some reason\n", SAMPLE_ERROR); }
+
+# define WARNING_NO_MANUF_FILE() { fprintf(stderr, "%smanuf file not found, information about vendor won't be shown, run `make vendor` to download\n", SAMPLE_WARNING); }
+# define WARNING_CANT_MODIFY_IP_FORWARD() { fprintf(stderr, "%s/proc/sys/net/ipv4/ip_forward can't be modify for some reason, packet may or may not be forwarded\n", SAMPLE_WARNING); }
+# define WARNING_NETWORK_EMPTY() { fprintf(stderr, "%sonly you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning\n", SAMPLE_WARNING); }
+# define WARNING_NO_THREADS_CREATED() { fprintf(stderr, "%sno threads have been created, only invalid hosts has been selected ?\n", SAMPLE_WARNING); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\

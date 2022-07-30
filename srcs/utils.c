@@ -114,6 +114,22 @@ nmap_r *get_gateway_from_scan(nmap_r **scan)
 	return NULL;
 }
 
+void to_upper_str(char *str)
+{
+	while (str && *str) {
+		*str = toupper(*str);
+		++str;
+	}
+}
+
+void to_lower_str(char *str)
+{
+	while (str && *str) {
+		*str = tolower(*str);
+		++str;
+	}
+}
+
 int turn_on_ip_packet_forward()
 {
 	FILE *fd;
@@ -125,7 +141,6 @@ int turn_on_ip_packet_forward()
 	TELLACTIVATEIPFORWARD();
 	return 0;
 err:
-	ERROR_CANT_MODIFY_IP_FORWARD();
 	return -1;
 }
 
@@ -140,7 +155,6 @@ int turn_off_ip_packet_forward()
 	TELLDEACTIVATEIPFORWARD();
 	return 0;
 err:
-	ERROR_CANT_MODIFY_IP_FORWARD();
 	return -1;
 }
 
@@ -270,7 +284,7 @@ int fill_vendor_from_manuf_file(nmap_r **scan) {
 	manuf_db **db = NULL;
 
 	if (!(fd = fopen("manuf", "r")))
-		{ ERROR_NO_MANUF_FILE(); return 0; }
+		{ WARNING_NO_MANUF_FILE(); return 0; }
 	if (!(db = create_manu_database(fd)))
 		goto err;
 	for (size_t i = 0; scan[i]; ++i) {

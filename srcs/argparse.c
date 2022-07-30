@@ -57,16 +57,22 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		}
 
 		case 'm': {
-			if (strncmp(arg, "INTERACTIVE", 11) == 0)
+			char *str;
+			if (!(str = strdup(arg)))
+				{ ERROR_MALLOC(); return ARGP_ERR_UNKNOWN; }
+			to_upper_str(str);
+			if (strncmp(str, "INTERACTIVE", 11) == 0)
 				arguments->mode = INTERACTIVE;
-			else if (strncmp(arg, "KICK", 4) == 0)
+			else if (strncmp(str, "KICK", 4) == 0)
 				arguments->mode = KICK;
-			else if (strncmp(arg, "SPOOF", 5) == 0)
+			else if (strncmp(str, "SPOOF", 5) == 0)
 				arguments->mode = SPOOF;
 			else {
 				ERROR_UNKNOWN_MODE(arg);
+				free(str);
 				argp_usage(state);
 			}
+			free(str);
 			break;
 		}
 

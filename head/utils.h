@@ -38,6 +38,8 @@ int ip_forward_status(); // check if a mitm attack is possible
 int IsPrivateAddress(uint32_t ip);
 int turn_on_ip_packet_forward();
 int turn_off_ip_packet_forward();
+void to_upper_str(char *str);
+void to_lower_str(char *str);
 
 /* attack.c */
 int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *list);

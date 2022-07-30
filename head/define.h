@@ -77,7 +77,7 @@ typedef __uint128_t uint128_t;
 # define TELLRESTORINGMAC() { printf("%sRestoring arp table of the victim, ctrl+c when you feel like the arp table is restored\n", SAMPLE_INFO); }
 # define TELLACTIVATEIPFORWARD() { printf("%sIP forward was successfully activated\n", SAMPLE_INFO); }
 # define TELLDEACTIVATEIPFORWARD() { printf("%sIP forward was successfully desactivated\n", SAMPLE_INFO); }
-# define TELLIPFORWARDDEFAULT(C) { printf("%sIP forward is currently at value: %c\n", SAMPLE_INFO, C); }
+# define TELLIPFORWARDDEFAULT(C) { printf("%s/proc/sys/net/ipv4/ip_forward defaults to value: %c\n", SAMPLE_INFO, C); }
 
 # define TELLEXITING() { printf("Exiting program...\n"); }
 

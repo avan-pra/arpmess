@@ -7,14 +7,11 @@ This tool was greatly inspired by [kickthemout](https://github.com/k4m4/kickthem
 ```
 1 $ make vendor
 2 $ make
-3 # echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-4 # iptables --policy FORWARD ACCEPT
-5 # ./arpmess
+3 # ./arpmess
 ```
 
-- Step 1 is optional (useful to print info about mac vendors)  
-- Step 3 and 4 are only needed if you want to perform a mitm (other step may be needed but those are not linked to this project but to your kernel ip packet forwarding capabilities)   
-- Step 3, 4 and 5 need to be run in a root shell  
+- Step 1 is optional (useful to print info about mac vendors)    
+- Step 3 need to be run in a root shell  
 
 # Usage
 ```
@@ -50,5 +47,6 @@ arpmess -- An arpspoofing software, all in one in C
 Please open an issue if you have any problem.  
 
 # TODO
+- desactivate/activate packet forwarding
 - on warning debug message change prompt color to orange and - to ~
 - idk give me some ideas

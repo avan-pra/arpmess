@@ -42,8 +42,6 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 		}
 		/* 3 */
 		else if (action == ACTION_SPOOF_SOME) {
-			if (mitm_requirements() == -1) // only on critical error returns -1
-				goto err;
 			long long hostidx = ask_index_list(*scan, &list);
 			if (hostidx == 1) // malloc error
 				goto err;
@@ -151,6 +149,8 @@ int main(int argc, char **argv)
 
 	if (fill_vendor_from_manuf_file(scan) != 0)
 		goto err;
+
+	ip_forward_status();
 
 	TELLHEADER();
 

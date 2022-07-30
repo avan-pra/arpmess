@@ -144,6 +144,9 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 	struct arpthreadinfo **argp;
 	int isidxinlistret;
 
+	if (turn_off_ip_packet_forward() != 0)
+		goto err;
+
 	if (arguments->ppm == 0)
 		ERROR_PPM_HIGH();
 
@@ -194,6 +197,7 @@ err:
 	return -1;
 }
 
+/* start spoofing on the selected list */
 int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 {
 	SOCKET arpsock = -1;
@@ -202,6 +206,9 @@ int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 	struct arpthreadinfo **argp = NULL;
 	nmap_r *gateway = get_gateway_from_scan(scan); // may segfault later on idk
 	int isidxinlistret;
+
+	if (turn_on_ip_packet_forward() != 0)
+		goto err;
 
 	if (arguments->ppm == 0)
 		ERROR_PPM_HIGH();

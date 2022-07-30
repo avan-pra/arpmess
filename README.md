@@ -47,6 +47,5 @@ arpmess -- An arpspoofing software, all in one in C
 Please open an issue if you have any problem.  
 
 # TODO
-- desactivate/activate packet forwarding
 - on warning debug message change prompt color to orange and - to ~
 - idk give me some ideas

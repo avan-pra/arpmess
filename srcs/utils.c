@@ -114,8 +114,38 @@ nmap_r *get_gateway_from_scan(nmap_r **scan)
 	return NULL;
 }
 
+int turn_on_ip_packet_forward()
+{
+	FILE *fd;
+
+	if (!(fd = fopen("/proc/sys/net/ipv4/ip_forward", "a")))
+		{ goto err; }
+	fwrite("1\n", 2, sizeof(char), fd);
+	fclose(fd);
+	TELLACTIVATEIPFORWARD();
+	return 0;
+err:
+	ERROR_CANT_MODIFY_IP_FORWARD();
+	return -1;
+}
+
+int turn_off_ip_packet_forward()
+{
+	FILE *fd;
+
+	if (!(fd = fopen("/proc/sys/net/ipv4/ip_forward", "a")))
+		{ goto err; }
+	fwrite("0\n", 2, sizeof(char), fd);
+	fclose(fd);
+	TELLDEACTIVATEIPFORWARD();
+	return 0;
+err:
+	ERROR_CANT_MODIFY_IP_FORWARD();
+	return -1;
+}
+
 /* check if we can perform the mitm attack, notify the user if not */
-int mitm_requirements()
+int ip_forward_status()
 {
 	FILE *fd;
 	char c[2];
@@ -125,12 +155,13 @@ int mitm_requirements()
 	fgets(c , 2, fd);
 	fclose(fd);
 
+	TELLIPFORWARDDEFAULT(c[0]);
 	if (c[0] == '0') {
-		ERROR_NO_IP_FORWARD();
 		return 1;
 	}
-	else if (c[0] == '1')
+	else if (c[0] == '1') {
 		return 0;
+	}
 err:
 	return -1;
 }

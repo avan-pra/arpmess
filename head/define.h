@@ -75,6 +75,9 @@ typedef __uint128_t uint128_t;
 # define TELLSTOPATTACK() { printf("%sStopped the spoofing, returning to main menu...\n", SAMPLE_INFO); }
 # define TELLRESCAN() { printf("%sRescanning...\n", SAMPLE_INFO); }
 # define TELLRESTORINGMAC() { printf("%sRestoring arp table of the victim, ctrl+c when you feel like the arp table is restored\n", SAMPLE_INFO); }
+# define TELLACTIVATEIPFORWARD() { printf("%sIP forward was successfully activated\n", SAMPLE_INFO); }
+# define TELLDEACTIVATEIPFORWARD() { printf("%sIP forward was successfully desactivated\n", SAMPLE_INFO); }
+# define TELLIPFORWARDDEFAULT(C) { printf("%sIP forward is currently at value: %c\n", SAMPLE_INFO, C); }
 
 # define TELLEXITING() { printf("Exiting program...\n"); }
 
@@ -104,6 +107,8 @@ typedef __uint128_t uint128_t;
 # define ERROR_NO_TARGET_SUPPLIED() { fprintf(stderr, "\n%sA target list is needed for the current mode\n", SAMPLE_ERROR); }
 # define ERROR_UNKNOWN_MODE(MODE) { fprintf(stderr, "%sUnknown mode %s, uppercase ? INTERACTIVE/KICK/SPOOF\n", SAMPLE_ERROR, MODE); }
 # define ERROR_PPM_HIGH() { fprintf(stderr, "%sarp reply packets will be sent as fast as possible, care\n", SAMPLE_ERROR); }
+# define ERROR_CANT_MODIFY_IP_FORWARD() { fprintf(stderr, "%s/proc/sys/net/ipv4/ip_forward can't be modify for some reason\n", SAMPLE_ERROR); }
+
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\
 \told: %d.%d.%d.%d\n\

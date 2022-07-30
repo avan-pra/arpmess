@@ -5,13 +5,15 @@ This tool was greatly inspired by [kickthemout](https://github.com/k4m4/kickthem
 
 # Installation & Run
 ```
-1 $ make vendor
-2 $ make
-3 # ./arpmess
+1 # apt install -y nmap
+2 $ make vendor
+3 $ make
+4 # ./arpmess
 ```
 
-- Step 1 is optional (useful to print info about mac vendors)    
-- Step 3 need to be run in a root shell  
+- Replace `apt install -y` in step 1 by your favourite package manager install line, ie: `nmap` binary must be in path.
+- Step 1 and 4 need to be run in a root shell.
+- Step 2 is optional (useful to print info about mac vendors).
 
 # Usage
 ```

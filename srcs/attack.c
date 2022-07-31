@@ -167,9 +167,6 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
 		if ((isidxinlistret = isidxinlist(i, list)) == -1) // check wether we should or not include this particular host
 			goto err;
-		/* check wether self or gateway was selected, print error msg if so */
-		if ((scan[i]->gateway == 1 || scan[i]->self == 1) && isidxinlistret)
-			WARNING_CANT_SELECT_SELF_OR_GATEWAY();
 		if (scan[i]->gateway == 0 && scan[i]->self == 0 && isidxinlistret) {
 			if (!(argp[j] = malloc(sizeof(arpthreadinfo))))
 				{ ERROR_MALLOC(); goto err; }
@@ -243,6 +240,9 @@ int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list)
 	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
 		if ((isidxinlistret = isidxinlist(i, list)) == -1) // check wether we should or not include this particular host
 			goto err;
+		/* check wether self or gateway was selected, print error msg if so */
+		if ((scan[i]->gateway == 1 || scan[i]->self == 1) && list && isidxinlistret)
+			WARNING_CANT_SELECT_SELF_OR_GATEWAY();
 		if (scan[i]->gateway == 0 && scan[i]->self == 0 && isidxinlistret) {
 			if (!(argp[j] = malloc(sizeof(arpthreadinfo))))
 				{ ERROR_MALLOC(); goto err; }

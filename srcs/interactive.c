@@ -76,7 +76,7 @@ int ask_action()
 		|| action == 'E' || action == 'S'
 		||action == 'L')
 			break;
-		ERROR_UNRECOGNIZED_CHAR_ASK(action);
+		WARNING_UNRECOGNIZED_CHAR_ASK(action);
 		ASK_ATTACK_TYPE();
 	}
 	if (action == 'E')

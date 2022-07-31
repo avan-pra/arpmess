@@ -91,9 +91,6 @@ typedef __uint128_t uint128_t;
 # define ERROR_POPEN() { fprintf(stderr, "%spopen() returned NULL\n", SAMPLE_ERROR); }
 # define ERROR_NMAP(LINE) { fprintf(stderr, "%sThe nmap scan returned an incomprehensible line: |%s|", SAMPLE_ERROR, LINE); }
 # define ERROR_SCAN() { fprintf(stderr, "%sThere was a prolem with the nmap scan, is the tool installed ?\n", SAMPLE_ERROR); }
-# define ERROR_UNRECOGNIZED_CHAR_ASK(CHAR) { fprintf(stderr, "%sUnrecognized selected choice: %c\n", SAMPLE_ERROR, CHAR); }
-# define ERROR_UNRECOGNIZED_UINTEGER_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %u\n", SAMPLE_ERROR, INT); }
-# define ERROR_UNRECOGNIZED_LONG_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %lld\n", SAMPLE_ERROR, INT); }
 # define ERROR_CANT_SELECT_SELF_OR_GATEWAY() { fprintf(stderr, "%sYou can't poison neither the gateway nor yourself\n", SAMPLE_ERROR); }
 # define ERROR_NO_YET_IMPLEMENTED() { fprintf(stderr, "%sThis feature hasnt been implemented yet\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_DENIED() { fprintf(stderr, "%scould not create a raw socket\n", SAMPLE_ERROR); }
@@ -111,6 +108,9 @@ typedef __uint128_t uint128_t;
 # define WARNING_CANT_MODIFY_IP_FORWARD() { fprintf(stderr, "%s/proc/sys/net/ipv4/ip_forward can't be modify for some reason, packet may or may not be forwarded\n", SAMPLE_WARNING); }
 # define WARNING_NETWORK_EMPTY() { fprintf(stderr, "%sonly you and your gateway are on the network, NO OPTIONS ARE AVAILABLE, try rescanning\n", SAMPLE_WARNING); }
 # define WARNING_NO_THREADS_CREATED() { fprintf(stderr, "%sno threads have been created, only invalid hosts has been selected ?\n", SAMPLE_WARNING); }
+# define WARNING_UNRECOGNIZED_CHAR_ASK(CHAR) { fprintf(stderr, "%sUnrecognized selected choice: %c\n", SAMPLE_WARNING, CHAR); }
+# define WARNING_UNRECOGNIZED_UINTEGER_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %u\n", SAMPLE_WARNING, INT); }
+# define WARNING_UNRECOGNIZED_LONG_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %lld\n", SAMPLE_WARNING, INT); }
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\

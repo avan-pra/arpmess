@@ -16,8 +16,13 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 			list = NULL;
 		}
 
+		/* if no one on the network, action > 0 are attack */
+		if (action > 0 && arguments->scanamount - 2 <= 0) {
+			printf("\n");
+			WARNING_NETWORK_EMPTY();
+		}
 		/* 1 */
-		if (action == ACTION_KICK_SOME) {
+		else if (action == ACTION_KICK_SOME) {
 			long long hostidx = ask_index_list(*scan, &list);
 			if (hostidx == 1) // malloc error
 				goto err;
@@ -33,12 +38,8 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 		}
 		/* 2 */
 		else if (action == ACTION_KICK_ALL) {
-			if (arguments->scanamount - 2 > 0) {
-				if (start_attack_some(arguments, *scan, NULL) != 0)
-					goto err;
-			}
-			else
-				WARNING_NETWORK_EMPTY();
+			if (start_attack_some(arguments, *scan, NULL) != 0)
+				goto err;
 		}
 		/* 3 */
 		else if (action == ACTION_SPOOF_SOME) {
@@ -57,15 +58,11 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 		}
 		/* 4 */
 		else if (action == ACTION_SPOOF_ALL) {
-			if (arguments->scanamount - 2 > 0) {
-				if (arpspoof_some(arguments, *scan, NULL) != 0)
-					goto err;
-			}
-			else
-				WARNING_NETWORK_EMPTY();
+			if (arpspoof_some(arguments, *scan, NULL) != 0)
+				goto err;
 		}
 		/* L */
-		else if (action == ACTION_LIST) {
+		if (action == ACTION_LIST) {
 			PRINT_SCAN_LIST(*scan);
 		}
 		/* S */

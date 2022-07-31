@@ -31,15 +31,6 @@ void PRINT_SCAN_LIST(nmap_r **scan)
 	}
 }
 
-char get_first_non_whitespace(char *buf)
-{
-	for (size_t i = 0; buf[i]; ++i) {
-		if (!isspace(buf[i]))
-			return buf[i];
-	}
-	return 0;
-}
-
 int ask_index_list(nmap_r **scan, char **buf)
 {
 	size_t size = 0;

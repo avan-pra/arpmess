@@ -130,6 +130,15 @@ void to_lower_str(char *str)
 	}
 }
 
+char get_first_non_whitespace(char *buf)
+{
+	for (size_t i = 0; buf[i]; ++i) {
+		if (!isspace(buf[i]))
+			return buf[i];
+	}
+	return 0;
+}
+
 int turn_on_ip_packet_forward()
 {
 	FILE *fd;

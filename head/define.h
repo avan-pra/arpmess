@@ -91,7 +91,6 @@ typedef __uint128_t uint128_t;
 # define ERROR_POPEN() { fprintf(stderr, "%spopen() returned NULL\n", SAMPLE_ERROR); }
 # define ERROR_NMAP(LINE) { fprintf(stderr, "%sThe nmap scan returned an incomprehensible line: |%s|", SAMPLE_ERROR, LINE); }
 # define ERROR_SCAN() { fprintf(stderr, "%sThere was a prolem with the nmap scan, is the tool installed ?\n", SAMPLE_ERROR); }
-# define ERROR_CANT_SELECT_SELF_OR_GATEWAY() { fprintf(stderr, "%sYou can't poison neither the gateway nor yourself\n", SAMPLE_ERROR); }
 # define ERROR_NO_YET_IMPLEMENTED() { fprintf(stderr, "%sThis feature hasnt been implemented yet\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_DENIED() { fprintf(stderr, "%scould not create a raw socket\n", SAMPLE_ERROR); }
 # define ERROR_SOCKET_MODIFY_DENIED(IFACENAME) { fprintf(stderr, "%ssuccessfully create a socket but could not bind it to device %s using setsockopt()\n", SAMPLE_ERROR, IFACENAME); }
@@ -111,6 +110,8 @@ typedef __uint128_t uint128_t;
 # define WARNING_UNRECOGNIZED_CHAR_ASK(CHAR) { fprintf(stderr, "%sUnrecognized selected choice: %c\n", SAMPLE_WARNING, CHAR); }
 # define WARNING_UNRECOGNIZED_UINTEGER_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %u\n", SAMPLE_WARNING, INT); }
 # define WARNING_UNRECOGNIZED_LONG_ASK(INT) { fprintf(stderr, "%sUnrecognized selected choice: %lld\n", SAMPLE_WARNING, INT); }
+# define WARNING_CANT_SELECT_SELF_OR_GATEWAY() { fprintf(stderr, "%sYou can't poison neither the gateway nor yourself\n", SAMPLE_WARNING); }
+
 
 # define ASK_OLD_OR_NEW_IP(uchoice, name, old, new) {\
 	printf("More than 1 ipv4 have been detected for the selected interface %s\n\

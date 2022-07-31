@@ -49,7 +49,6 @@ arpmess -- An arpspoofing software, all in one in C
 Please open an issue if you have any problem.  
 
 # TODO
-- recognized shit input in isidxinlist()
 - on warning debug message change prompt color to orange and - to ~
 - restore mode to restore arp table initial state after attack
 - idk give me some ideas

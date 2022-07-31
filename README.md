@@ -42,6 +42,9 @@ arpmess -- An arpspoofing software, all in one in C
   -?, --help                 Give this help list
       --usage                Give a short usage message
 ```
+- `Kick` is for kicking device device off your network (well in fact it doesn't, it just deny them internet access).  
+- `Spoof` is to intercept communication of an host in your network, open up wireshark and check the interface the programm binded it's socket to.  
+- `Restore` is the contrary of `Kick` it restore the gateway hardware adress to it's original state (in the selected host(s) arp table).  
 
 # Example
 ![example usage](/img/example.png)
@@ -49,6 +52,5 @@ arpmess -- An arpspoofing software, all in one in C
 Please open an issue if you have any problem.  
 
 # TODO
-- on warning debug message change prompt color to orange and - to ~
-- restore mode to restore arp table initial state after attack
+- on warning debug message change prompt color to orange and - to ~ (already done to a lot)
 - idk give me some ideas

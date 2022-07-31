@@ -60,10 +60,11 @@ int ask_action()
 
 	ASK_ATTACK_TYPE();
 	while (1) {
-		fgets(buffer, 0x40, stdin);
+		fgets(buffer, 0x40, stdin); // should be replaced by getline no ?
 		action = toupper(buffer[0]);
 		if (action == '1' || action == '2'
 		|| action == '3' || action == '4'
+		|| action == '5' || action == '6'
 		|| action == 'E' || action == 'S'
 		||action == 'L')
 			break;

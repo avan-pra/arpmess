@@ -137,7 +137,7 @@ static int isidxinlist(size_t idx, char *list)
 	return ret;
 }
 
-/* start attack on the selected list, if list is NULL, attack all the scan (exept gateway and us ofc */
+/* start attack on the selected list, if list is NULL, attack all the scan (exept gateway and us ofc) */
 int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *list)
 {
 	SOCKET iface = -1;
@@ -167,6 +167,9 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
 		if ((isidxinlistret = isidxinlist(i, list)) == -1) // check wether we should or not include this particular host
 			goto err;
+		/* check wether self or gateway was selected, print error msg if so */
+		if ((scan[i]->gateway == 1 || scan[i]->self == 1) && list && isidxinlistret)
+			WARNING_CANT_SELECT_SELF_OR_GATEWAY();
 		if (scan[i]->gateway == 0 && scan[i]->self == 0 && isidxinlistret) {
 			if (!(argp[j] = malloc(sizeof(arpthreadinfo))))
 				{ ERROR_MALLOC(); goto err; }
@@ -194,6 +197,82 @@ int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *li
 		WARNING_NO_THREADS_CREATED();
 	}
 
+	TELLSTOPATTACK();
+
+	close(iface);
+	return 0;
+err:
+	if (iface != -1)
+		close(iface);
+	return -1;
+}
+
+/* retore the arp table of the list, if list is NULL, restore all the scan (exept gateway and us ofc) */
+int restore_some(const struct arguments *arguments, nmap_r **scan, char *list)
+{
+	SOCKET iface = -1;
+	pthread_t *thread = NULL;
+	struct arpthreadinfo **argp;
+	struct arguments argumentscopy;
+	size_t nthreadcreated = 0; // amount of thread that have been created
+	int isidxinlistret;
+
+	if (turn_off_ip_packet_forward() != 0)
+		{ WARNING_CANT_MODIFY_IP_FORWARD(); /* goto err; */ }
+
+	if (arguments->ppm == 0)
+		ERROR_PPM_HIGH();
+
+	if ((iface = initiate_socket_for_arp(arguments->ifacename)) == -1)
+		goto err;
+	TELLSOCKETSUCCESS(arguments->ifacename);
+
+	/* create a copy of arguments with a modified self HA, this is the sketcy restore part */
+	memcpy(&argumentscopy, arguments, sizeof(struct arguments));
+	copy_mac(argumentscopy.self_ha, arguments->gateway_ha);
+
+	/* malloc each thread and its arguments */
+	if (!(thread = calloc((arguments->scanamount), sizeof(thread))))
+		{ ERROR_MALLOC(); goto err; }
+	if (!(argp = calloc((arguments->scanamount), sizeof(arpthreadinfo*))))
+		{ ERROR_MALLOC(); goto err; }
+	start_signal();
+
+	/* setup thread arguments and start it if its not the gateway or us */
+	for (size_t i = 0, j = 0; scan[i] != NULL; ++i) {
+		if ((isidxinlistret = isidxinlist(i, list)) == -1) // check wether we should or not include this particular host
+			goto err;
+		/* check wether self or gateway was selected, print error msg if so */
+		if ((scan[i]->gateway == 1 || scan[i]->self == 1) && list && isidxinlistret)
+			WARNING_CANT_SELECT_SELF_OR_GATEWAY();
+		if (scan[i]->gateway == 0 && scan[i]->self == 0 && isidxinlistret) {
+			if (!(argp[j] = malloc(sizeof(arpthreadinfo))))
+				{ ERROR_MALLOC(); goto err; }
+			argp[j]->iface = iface;
+			argp[j]->arguments = &argumentscopy;
+			argp[j]->target = scan[i];
+			pthread_create(&thread[j], NULL, arpthread, argp[j]);
+			++j;
+			nthreadcreated = j;
+		}
+	}
+	/* wait for thread to finish */
+	for (size_t i = 0; i < arguments->scanamount; ++i) {
+		if (thread[i] && argp[i]) {
+			pthread_join(thread[i], NULL);
+			free(argp[i]);
+		}
+	}
+	stop_signal();
+	g_stop = 1;
+	free(thread);
+	free(argp);
+
+	if (nthreadcreated == 0) {
+		WARNING_NO_THREADS_CREATED();
+	}
+
+	// change msg
 	TELLSTOPATTACK();
 
 	close(iface);

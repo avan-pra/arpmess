@@ -45,5 +45,7 @@ char get_first_non_whitespace(char *buf);
 /* attack.c */
 int start_attack_some(const struct arguments *arguments, nmap_r **scan, char *list);
 int arpspoof_some(const struct arguments *arguments, nmap_r **scan, char *list);
+/* this is nearly identical to this ^^ */
+int restore_some(const struct arguments *arguments, nmap_r **scan, char *list);
 
 #endif

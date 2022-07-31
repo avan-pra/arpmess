@@ -46,6 +46,8 @@
 # define ACTION_KICK_ALL '2'
 # define ACTION_SPOOF_SOME '3'
 # define ACTION_SPOOF_ALL '4'
+# define ACTION_RESTORE_SOME '5'
+# define ACTION_RESTORE_ALL '6'
 # define ACTION_EXIT -1
 # define ACTION_RETURN -2
 # define ACTION_SCAN -3
@@ -53,6 +55,7 @@
 # define INTERACTIVE 0
 # define KICK 1
 # define SPOOF 2
+# define RESTORE 3
 
 typedef __uint128_t uint128_t;
 
@@ -73,14 +76,14 @@ typedef __uint128_t uint128_t;
 # define TELLGATEWAYHA(HA) { printf("%sFound gateway hardware address: "MACCOLOR"%02x:%02x:%02x:%02x:%02x:%02x"ANSI_COLOR_RESET"\n", SAMPLE_NEW, HA[0], HA[1], HA[2], HA[3], HA[4], HA[5]); }
 # define TELLSOCKETSUCCESS(IFACENAME) { printf("%sSuccessfully binded raw socket to interface "IFACECOLOR"%s"ANSI_COLOR_RESET"\n", SAMPLE_INFO, IFACENAME); }
 # define TELLNUKINGTARGET(TARGETIP, GATEWAYIP, SELFMAC) { fprintf(stdout, "%sNuking target "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" with arp reply packet: "IPV4COLOR"%hhu.%hhu.%hhu.%hhu"ANSI_COLOR_RESET" is at "MACCOLOR"%02x:%02x:%02x:%02x:%02x:%02x"ANSI_COLOR_RESET"\n", SAMPLE_INFO, TARGETIP[0], TARGETIP[1], TARGETIP[2], TARGETIP[3], GATEWAYIP[0], GATEWAYIP[1], GATEWAYIP[2], GATEWAYIP[3], SELFMAC[0], SELFMAC[1], SELFMAC[2], SELFMAC[3], SELFMAC[4], SELFMAC[5]); }
-# define TELLSTOPATTACK() { printf("%sStopped the spoofing, returning to main menu...\n", SAMPLE_INFO); }
+# define TELLSTOPATTACK() { printf("%sStopped poisonning, returning...\n", SAMPLE_INFO); }
 # define TELLRESCAN() { printf("%sRescanning...\n", SAMPLE_INFO); }
 # define TELLRESTORINGMAC() { printf("%sRestoring arp table of the victim, ctrl+c when you feel like the arp table is restored\n", SAMPLE_INFO); }
 # define TELLACTIVATEIPFORWARD() { printf("%s/proc/sys/net/ipv4/ip_forward has been changed to 1\n", SAMPLE_INFO); }
 # define TELLDEACTIVATEIPFORWARD() { printf("%s/proc/sys/net/ipv4/ip_forward has been changed to 0\n", SAMPLE_INFO); }
 # define TELLIPFORWARDDEFAULT(C) { printf("%s/proc/sys/net/ipv4/ip_forward defaults to value: %c\n", SAMPLE_INFO, C); }
 
-# define TELLEXITING() { printf("Exiting program...\n"); }
+# define TELLEXITING() { printf("%sExiting program...\n", SAMPLE_INFO); }
 
 # define ERROR_UID(UID, PROG_PATH) { fprintf(stderr, "%sExpected uid %d to run %s, got %d\n", SAMPLE_ERROR, 0, PROG_PATH, UID); }
 # define ERROR_EXIT() { fprintf(stderr, "%s"ANSI_COLOR_RED"Exiting..."ANSI_COLOR_RESET"\n", SAMPLE_ERROR); }
@@ -139,6 +142,8 @@ typedef __uint128_t uint128_t;
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"2"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Kick "ANSI_COLOR_BRIGHT_WHITE"ALL"ANSI_COLOR_RESET" Off\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"3"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Spoof "ANSI_COLOR_BRIGHT_WHITE"SOME"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"4"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Spoof "ANSI_COLOR_BRIGHT_WHITE"ALL"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"5"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Restore "ANSI_COLOR_BRIGHT_WHITE"SOME"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"6"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Restore "ANSI_COLOR_BRIGHT_WHITE"ALL"ANSI_COLOR_RESET"\n\
 \n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"L"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" List hosts"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"S"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" reScan"ANSI_COLOR_RESET"\n\

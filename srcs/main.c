@@ -61,6 +61,26 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 			if (arpspoof_some(arguments, *scan, NULL) != 0)
 				goto err;
 		}
+		/* 5 */
+		else if (action == ACTION_RESTORE_SOME) {
+			long long hostidx = ask_index_list(*scan, &list);
+			if (hostidx == 1) // malloc error
+				goto err;
+			if (hostidx == ACTION_EXIT) {
+				free(list);
+				break;
+			}
+			if (hostidx == ACTION_RETURN)
+				continue;
+			if (restore_some(arguments, *scan, list) != 0)
+				goto err;
+			continue;
+		}
+		/* 6 */
+		else if (action == ACTION_RESTORE_ALL) {
+			if (restore_some(arguments, *scan, NULL) != 0)
+				goto err;
+		}
 		/* L */
 		if (action == ACTION_LIST) {
 			PRINT_SCAN_LIST(*scan);
@@ -106,6 +126,24 @@ static int spoofmode(nmap_r **scan, struct arguments *arguments)
 	if (arguments->scanamount - 2 > 0) {
 		printf("\n");
 		if (arpspoof_some(arguments, scan, NULL) != 0)
+			goto err;
+	}
+	else if (arguments->target_list != NULL) {
+		ERROR_NO_TARGET_SUPPLIED();
+	}
+	else {
+		WARNING_NETWORK_EMPTY();
+	}
+	return 0;
+err:
+	return 1;
+}
+
+static int restoremode(nmap_r **scan, struct arguments *arguments)
+{
+	if (arguments->scanamount - 2 > 0) {
+		printf("\n");
+		if (restore_some(arguments, scan, NULL) != 0)
 			goto err;
 	}
 	else if (arguments->target_list != NULL) {
@@ -174,10 +212,19 @@ int main(int argc, char **argv)
 			ERROR_NO_TARGET_SUPPLIED();
 	}
 
+	if (arguments.mode == RESTORE) {
+		if (arguments.target_list != NULL) {
+			if (restoremode(scan, &arguments) != 0)
+				goto err;
+		}
+		else
+			ERROR_NO_TARGET_SUPPLIED();
+	}
 
 	if (arguments.nmapflags != NULL)
 		free(arguments.nmapflags);
 	free_arp_scan(scan);
+	TELLEXITING();
 	return 0;
 
 err:

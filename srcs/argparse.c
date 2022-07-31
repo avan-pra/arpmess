@@ -13,7 +13,7 @@
 */
 static struct argp_option options[] =
 {
-	{ "mode", 'm', "INTERACTIVE/KICK/SPOOF/RESTORE", 0, "Defaults to INTERACTIVE, if KICK/SPOOF/RESTORE is selected, -t arguments MUST be specified,       ex: `-m KICK`", 0x0},
+	{ "mode", 'm', "INTERACTIVE/KICK/SPOOF/RESTORE", 0, "Defaults to INTERACTIVE, if KICK/SPOOF/RESTORE is selected, -t arguments MUST be specified.       ex: `-m KICK`", 0x0},
 	{ "interface", 'i', "INTERFACE_NAME", 0, "Specify interface to use ex: `-i eth0` (IF_NAMESIZE max)", 0x0 },
 	{ "packets", 'p', "PACKETPERMINUTE", 0, "Number of packets broadcasted per minute ex: `-p 24` (default: 12) WARNING: 0 for unlimited, very resource intensive", 0x0 },
 	{ "netmask", 'n', "CIDR", 0, "Use netmask to look for hosts instead of the network one IN CIDR NOTATION ex: `-n 24` for 255.255.255.0", 0x0 },

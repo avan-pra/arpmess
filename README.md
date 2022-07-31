@@ -25,8 +25,8 @@ arpmess -- An arpspoofing software, all in one in C
                              know what you are doing
   -i, --interface=INTERFACE_NAME   Specify interface to use ex: `-i eth0`
                              (IF_NAMESIZE max)
-  -m, --mode=INTERACTIVE/KICK/SPOOF
-                             Defaults to INTERACTIVE, if KICK/SPOOF is
+  -m, --mode=INTERACTIVE/KICK/SPOOF/RESTORE
+                             Defaults to INTERACTIVE, if KICK/SPOOF/RESTORE is
                              selected, -t arguments MUST be specified,
                              ex: `-m KICK`
   -n, --netmask=CIDR         Use netmask to look for hosts instead of the

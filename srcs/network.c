@@ -137,7 +137,7 @@ static void *print_nmap_running(void *argp)
 			TELLHANGON();
 			gettimeofday(&start, NULL);
 		}
-		sleep(0.2);
+		usleep(2000);
 	}
 	return NULL;
 }
@@ -288,8 +288,8 @@ nmap_r **nmapscan(struct arguments *arguments)
 	if (arguments->target_list == NULL && arguments->mode == INTERACTIVE) {
 		asprintf(&command, "nmap -sn -n %s %hhu.%hhu.%hhu.%hhu/%d 2>/dev/null",
 			arguments->nmapflags == NULL ? "" : arguments->nmapflags,
-			arguments->gateway_pa[0] & arguments->netmask[0], arguments->gateway_pa[1] & arguments->netmask[1],
-			arguments->gateway_pa[2] & arguments->netmask[2], arguments->gateway_pa[3] & arguments->netmask[3],
+			(uint8_t)(arguments->gateway_pa[0] & arguments->netmask[0]), (uint8_t)(arguments->gateway_pa[1] & arguments->netmask[1]),
+			(uint8_t)(arguments->gateway_pa[2] & arguments->netmask[2]), (uint8_t)(arguments->gateway_pa[3] & arguments->netmask[3]),
 			__builtin_popcount(*(uint32_t*)arguments->netmask)
 		);
 		if (!command)

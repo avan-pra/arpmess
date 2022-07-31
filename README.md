@@ -50,4 +50,5 @@ Please open an issue if you have any problem.
 
 # TODO
 - on warning debug message change prompt color to orange and - to ~
+- restore mode to restore arp table initial state after attack
 - idk give me some ideas

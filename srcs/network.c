@@ -113,14 +113,33 @@ int get_network_interface(char ifacename[IF_NAMESIZE], uint8_t gateway_pa[IPV4_L
 	}
 	fclose(fd);
 	if (ret != 0) {
-		ifacename[0] == 0x0 ? (ERROR_NO_IFACE(NULL)) : (ERROR_NO_IFACE(ifacename));
-		ERROR_NO_GATEWAY();
+		char *s = NULL;
+		size_t size;
+
+		ifacename[0] == 0x0 ? (ERROR_NO_IFACE(NULL)) : (void)0 ;
+		gateway_pa[0] == 0x0 ? (ERROR_NO_GATEWAY()) : (void)0 ;
+		if (ifacename[0] == 0x0) {
+			printf("plz manually input interface name\n");
+			getline(&s, &size, stdin);
+			if (strlen(s) > 0)
+				s[strlen(s) - 1] = 0x0;
+			strncpy(ifacename, s, IF_NAMESIZE);
+			free(s);
+			s = NULL;
+		}
+		if (gateway_pa[0] == 0x0) {
+			printf("plz manually input gateway_pa\n");
+			getline(&s, &size, stdin);
+			sscanf(s, "%hhu.%hhu.%hhu.%hhu", &gateway_pa[0], &gateway_pa[1], &gateway_pa[2], &gateway_pa[3]);
+			free(s);
+			s = NULL;
+		}
 	}
 	else {
 		TELLIFACE(ifacename);
 		TELLGATEWAY(gateway_pa)
 	}
-	return ret;
+	return 0;
 }
 
 /* functions that print hang on while the nmap scan is running */

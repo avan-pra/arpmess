@@ -52,5 +52,6 @@ arpmess -- An arpspoofing software, all in one in C
 Please open an issue if you have any problem.  
 
 # TODO
+- modify message if no default gateway was found
 - on warning debug message change prompt color to orange and - to ~ (already done to a lot)
 - idk give me some ideas

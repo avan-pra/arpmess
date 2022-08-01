@@ -87,8 +87,8 @@ typedef __uint128_t uint128_t;
 
 # define ERROR_UID(UID, PROG_PATH) { fprintf(stderr, "%sExpected uid %d to run %s, got %d\n", SAMPLE_ERROR, 0, PROG_PATH, UID); }
 # define ERROR_EXIT() { fprintf(stderr, "%s"ANSI_COLOR_RED"Exiting..."ANSI_COLOR_RESET"\n", SAMPLE_ERROR); }
-# define ERROR_NO_IFACE(IFACENAME) { IFACENAME == NULL ? fprintf(stderr, "%sCould not find a fitting interface\n", SAMPLE_ERROR) : printf("%sinterface %s not found or not fitting\n", SAMPLE_ERROR, (char*)IFACENAME); }
-# define ERROR_NO_GATEWAY() { fprintf(stderr, "%sCould not find a gateway\n", SAMPLE_ERROR); }
+# define ERROR_NO_IFACE(IFACENAME) { IFACENAME == NULL ? fprintf(stderr, "%sCould not find a fitting interface, insert interface name (ex: `eth0`)\n%s", SAMPLE_ERROR, PROMPT) : printf("%sinterface %s not found or not fitting\n", SAMPLE_ERROR, (char*)IFACENAME); }
+# define ERROR_NO_GATEWAY() { fprintf(stderr, "%sCould not find a gateway, insert manually (ex: `192.168.1.254`)\n%s", SAMPLE_ERROR, PROMPT); }
 # define ERROR_NO_INFO_FOR_IFACE(IFACENAME) { fprintf(stderr, "%sCould not find ipv4 and harware address of interface %s\n", SAMPLE_ERROR, IFACENAME); }
 # define ERROR_MALLOC() { fprintf(stderr, "%smalloc() returned NULL\n", SAMPLE_ERROR); }
 # define ERROR_POPEN() { fprintf(stderr, "%spopen() returned NULL\n", SAMPLE_ERROR); }

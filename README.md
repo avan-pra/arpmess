@@ -17,17 +17,19 @@ This tool was greatly inspired by [kickthemout](https://github.com/k4m4/kickthem
 
 # Usage
 ```
-Usage: arpmess [OPTION...] 
+Usage: arpmess [OPTION...]
 arpmess -- An arpspoofing software, all in one in C
 
-  -f, --nmapflag=-FLAG1 -FLAG2   Add flag to nmap command 
+  -f, --nmapflag=-FLAG1 -FLAG2   Add flag to nmap command
                              WARNING: don't play with this option unless you
                              know what you are doing
+  -g, --gateway=GATEWAY_IP   Specify gateway IP address (no verification) ex:
+                             `192.168.1.254`
   -i, --interface=INTERFACE_NAME   Specify interface to use ex: `-i eth0`
                              (IF_NAMESIZE max)
   -m, --mode=INTERACTIVE/KICK/SPOOF/RESTORE
                              Defaults to INTERACTIVE, if KICK/SPOOF/RESTORE is
-                             selected, -t arguments MUST be specified,
+                             selected, -t arguments MUST be specified.
                              ex: `-m KICK`
   -n, --netmask=CIDR         Use netmask to look for hosts instead of the
                              network one IN CIDR NOTATION ex: `-n 24` for

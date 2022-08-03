@@ -106,7 +106,8 @@ int get_network_interface(char ifacename[IF_NAMESIZE], uint8_t gateway_pa[IPV4_L
 		&& (ifacename[0] == 0 ? 1 : strcmp(iface, ifacename) == 0))
 		{
 			strncpy(ifacename, iface, IF_NAMESIZE);
-			*(uint32_t*)gateway_pa = strtol(gateway, NULL, 16);
+			if (gateway_pa[0] == 0) // if no gateway is specified
+				*(uint32_t*)gateway_pa = strtol(gateway, NULL, 16);
 			ret = 0;
 			break;
 		}

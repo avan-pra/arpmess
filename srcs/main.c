@@ -94,6 +94,9 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 			if (fill_vendor_from_manuf_file(*scan) != 0)
 				goto err;
 		}
+		else if (action == ACTION_CHANGE_PPM) {
+			change_ppm(arguments);
+		}
 		/* E */
 		else if (action == ACTION_EXIT)
 			break;

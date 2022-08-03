@@ -87,7 +87,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		case 'p': {
 			arguments->ppm = atoi(arg);
 			if (arguments->ppm < 0) {
-				ERROR_PACKET_PER_MINUTE();
+				ERROR_PACKET_PER_MINUTE(arguments->ppm);
 				argp_usage(state);
 			}
 			break;

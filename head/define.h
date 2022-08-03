@@ -52,6 +52,7 @@
 # define ACTION_RETURN -2
 # define ACTION_SCAN -3
 # define ACTION_LIST -4
+# define ACTION_CHANGE_PPM -5
 # define INTERACTIVE 0
 # define KICK 1
 # define SPOOF 2
@@ -82,6 +83,7 @@ typedef __uint128_t uint128_t;
 # define TELLACTIVATEIPFORWARD() { printf("%s/proc/sys/net/ipv4/ip_forward has been changed to 1\n", SAMPLE_INFO); }
 # define TELLDEACTIVATEIPFORWARD() { printf("%s/proc/sys/net/ipv4/ip_forward has been changed to 0\n", SAMPLE_INFO); }
 # define TELLIPFORWARDDEFAULT(C) { printf("%s/proc/sys/net/ipv4/ip_forward defaults to value: %c\n", SAMPLE_INFO, C); }
+# define TELL_CHANGE_PPM_HEADER(PPM) { printf("%sPacket's per minute value is currently %d%s\ninput new value: ", SAMPLE_INFO, PPM, (PPM == 0 ? " (unlimited)" : "")); }
 
 # define TELLEXITING() { printf("%sExiting program...\n", SAMPLE_INFO); }
 
@@ -99,7 +101,7 @@ typedef __uint128_t uint128_t;
 # define ERROR_SOCKET_MODIFY_DENIED(IFACENAME) { fprintf(stderr, "%ssuccessfully create a socket but could not bind it to device %s using setsockopt()\n", SAMPLE_ERROR, IFACENAME); }
 # define ERROR_SEND() { fprintf(stderr, "%ssendto() returned -1\n", SAMPLE_ERROR); }
 # define ERROR_RECV() { fprintf(stderr, "%srecvfrom() returned -1\n", SAMPLE_ERROR); }
-# define ERROR_PACKET_PER_MINUTE() { fprintf(stderr, "%sAmount of packets sent per minute must be >= 0, currently: %d\n", SAMPLE_ERROR, arguments->ppm); }
+# define ERROR_PACKET_PER_MINUTE(PPM) { fprintf(stderr, "%sAmount of packets sent per minute must be >= 0, currently: %d\n", SAMPLE_ERROR, PPM); }
 # define ERROR_NO_IP_FORWARD() { fprintf(stderr, "%sip forward is not enable, run `echo 1 | tee /proc/sys/net/ipv4/ip_forward` in a root shell to perform the mitm\n", SAMPLE_ERROR); }
 # define ERROR_TARGET_UNKNOWN_FORMAT(TARGET) { fprintf(stderr, "%sUnrecognized target %s, only private ipv4 are valid (10.0.0.0/8,172.16.0.0/12,192.168.0.0/16)\n", SAMPLE_ERROR, TARGET); }
 # define ERROR_NO_TARGET_SUPPLIED() { fprintf(stderr, "\n%sA target list is needed for the current mode\n", SAMPLE_ERROR); }
@@ -146,6 +148,7 @@ typedef __uint128_t uint128_t;
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"6"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_RESET" Restore "ANSI_COLOR_BRIGHT_WHITE"ALL"ANSI_COLOR_RESET"\n\
 \n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"L"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" List hosts"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"P"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Modify packet's sent / minute"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"S"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" reScan"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\
 \n\

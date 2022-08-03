@@ -52,6 +52,26 @@ int ask_index_list(nmap_r **scan, char **buf)
 	return 0;
 }
 
+int change_ppm(struct arguments *arguments)
+{
+	char *buf = NULL;
+	int newppm = 0;
+	size_t size = 0;
+
+	TELL_CHANGE_PPM_HEADER(arguments->ppm);
+	getline(&buf, &size, stdin);
+	sscanf(buf, "%d", &newppm);
+	if (newppm < 0)
+		{ ERROR_PACKET_PER_MINUTE(newppm); goto err; }
+	arguments->ppm = newppm;
+	free(buf);
+	return 0;
+err:
+	if (buf)
+		free(buf);
+	return -1;
+}
+
 /* attack one, refresh, etc... */
 int ask_action()
 {
@@ -66,13 +86,15 @@ int ask_action()
 		|| action == '3' || action == '4'
 		|| action == '5' || action == '6'
 		|| action == 'E' || action == 'S'
-		||action == 'L')
+		|| action == 'L' || action == 'P')
 			break;
 		WARNING_UNRECOGNIZED_CHAR_ASK(action);
 		ASK_ATTACK_TYPE();
 	}
 	if (action == 'E')
 		return ACTION_EXIT;
+	if (action == 'P')
+		return ACTION_CHANGE_PPM;
 	if (action == 'S')
 		return ACTION_SCAN;
 	if (action == 'L')

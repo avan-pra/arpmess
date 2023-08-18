@@ -53,6 +53,8 @@
 # define ACTION_SCAN -3
 # define ACTION_LIST -4
 # define ACTION_CHANGE_PPM -5
+# define ACTION_DUMP_NETWORK -6
+# define ACTION_LOAD_NETWORK -7
 # define INTERACTIVE 0
 # define KICK 1
 # define SPOOF 2
@@ -84,6 +86,9 @@ typedef __uint128_t uint128_t;
 # define TELLDEACTIVATEIPFORWARD() { printf("%s/proc/sys/net/ipv4/ip_forward has been changed to 0\n", SAMPLE_INFO); }
 # define TELLIPFORWARDDEFAULT(C) { printf("%s/proc/sys/net/ipv4/ip_forward defaults to value: %c\n", SAMPLE_INFO, C); }
 # define TELL_CHANGE_PPM_HEADER(PPM) { printf("%sPacket's per minute value is currently %d%s\ninput new value: ", SAMPLE_INFO, PPM, (PPM == 0 ? " (unlimited)" : "")); }
+# define TELL_DUMP_FILE_NAME(FILENAME) { printf("%sdumped the current host list to %s\n", SAMPLE_NEW, FILENAME); }
+# define TELL_LOAD_FILE_NAME(FILENAME) { printf("%sloaded host list from %s\n", SAMPLE_NEW, FILENAME); }
+
 
 # define TELLEXITING() { printf("%sExiting program...\n", SAMPLE_INFO); }
 
@@ -107,6 +112,7 @@ typedef __uint128_t uint128_t;
 # define ERROR_NO_TARGET_SUPPLIED() { fprintf(stderr, "\n%sA target list is needed for the current mode\n", SAMPLE_ERROR); }
 # define ERROR_UNKNOWN_MODE(MODE) { fprintf(stderr, "%sUnknown mode %s (INTERACTIVE/KICK/SPOOF)\n", SAMPLE_ERROR, MODE); }
 # define ERROR_PPM_HIGH() { fprintf(stderr, "%sarp reply packets will be sent as fast as possible, care\n", SAMPLE_ERROR); }
+# define ERROR_FILE_NOT_FOUND(FILENAME) { fprintf(stderr, "%sfile %s could not be found\n", SAMPLE_ERROR, FILENAME); }
 
 # define WARNING_NO_MANUF_FILE() { fprintf(stderr, "%smanuf file not found, information about vendor won't be shown, run `make vendor` to download\n", SAMPLE_WARNING); }
 # define WARNING_CANT_MODIFY_IP_FORWARD() { fprintf(stderr, "%s/proc/sys/net/ipv4/ip_forward can't be modify for some reason, packet may or may not be forwarded\n", SAMPLE_WARNING); }
@@ -150,6 +156,8 @@ typedef __uint128_t uint128_t;
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"L"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" List hosts"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"P"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Modify packet's sent / minute"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"S"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" reScan"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"D"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" dump host list for further use"ANSI_COLOR_RESET"\n\
+\t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"G"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" merge a list of host from a file"ANSI_COLOR_RESET"\n\
 \t"ANSI_COLOR_BRIGHT_YELLOW"["ANSI_COLOR_BRIGHT_RED"E"ANSI_COLOR_BRIGHT_YELLOW"]"ANSI_COLOR_BRIGHT_WHITE" Exit"ANSI_COLOR_RESET"\n\
 \n\
 "PROMPT, SAMPLE_INFO);\

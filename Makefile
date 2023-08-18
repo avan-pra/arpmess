@@ -32,7 +32,7 @@ fclean: clean
 re: fclean $(NAME)
 
 vendor:
-	curl https://gitlab.com/wireshark/wireshark/-/raw/master/manuf --output manuf || wget https://gitlab.com/wireshark/wireshark/-/raw/master/manuf
+	curl https://www.wireshark.org/download/automated/data/manuf --output manuf || wget https://www.wireshark.org/download/automated/data/manuf
 
 copy:
 	docker cp arpmess workctn:/root/arpmess

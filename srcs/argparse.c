@@ -18,6 +18,7 @@ static struct argp_option options[] =
 	{ "gateway", 'g', "GATEWAY_IP", 0, "Specify gateway IP address (no verification) ex: `192.168.1.254`", 0x0 },
 	{ "packets", 'p', "PACKETPERMINUTE", 0, "Number of packets broadcasted per minute ex: `-p 24` (default: 12) WARNING: 0 for unlimited, very resource intensive", 0x0 },
 	{ "netmask", 'n', "CIDR", 0, "Use netmask to look for hosts instead of the network one IN CIDR NOTATION ex: `-n 24` for 255.255.255.0", 0x0 },
+	{ "load", 'l', "FILENAME", 0, "Do not scan the network, load hosts from a file", 0x0 },
 	{ "nmapflag", 'f', "-FLAG1 -FLAG2", 0, "Add flag to nmap command \nWARNING: don't play with this option unless you know what you are doing", 0x0},
 	{ "target", 't', "IP1,IP2", 0, "Target list (comma separated), only found target will be used by the program                     ex: `-t 192.168.43.10,192.168.43.152`", 0x0 },
 	{ "verbose", 'v', 0, 0, "Produce verbose output USELESS AS OF NOW", 0x0 },
@@ -35,6 +36,13 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
 	switch (key)
 	{
+		case 'l':
+			if (!(arguments->filename = strdup(arg))) {
+				ERROR_MALLOC();
+				return ARGP_ERR_UNKNOWN;
+			}
+			break;
+
 		case 'v':
 			arguments->verbose = 1;
 			break;

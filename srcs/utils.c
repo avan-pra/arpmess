@@ -296,7 +296,7 @@ int fill_vendor_from_manuf_file(nmap_r **scan) {
 		{ WARNING_NO_MANUF_FILE(); return 0; }
 	if (!(db = create_manu_database(fd)))
 		goto err;
-	for (size_t i = 0; scan[i]; ++i) {
+	for (size_t i = 0; scan && scan[i]; ++i) {
 		for (size_t j = 0; db[j] != NULL; ++j) {
 			if (is_mac_equal_manuf(db[j]->ha, scan[i]->ha))
 			{

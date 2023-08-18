@@ -247,6 +247,33 @@ err:
 	return NULL;
 }
 
+uint get_scan_size(nmap_r **scan) {
+	uint i = 0;
+
+	while (scan && scan[i]) {++i;}
+	return i;
+}
+
+nmap_r **add_scan_to_scan_list(nmap_r **scan, nmap_r* c_scan) {
+	uint idx = get_scan_size(scan);
+
+	if (!(scan = realloc(scan, (idx + 2) * sizeof(nmap_r*))))
+		{ ERROR_MALLOC(); goto err; }
+	scan[idx + 1] = NULL;
+	if (!(scan[idx] = calloc(1, sizeof(nmap_r))))
+		{ ERROR_MALLOC(); goto err; }
+	memcpy(scan[idx], c_scan, sizeof(nmap_r));
+	scan[idx]->idx = idx;
+
+	if (scan == NULL)
+		ERROR_SCAN();
+	return scan;
+
+err:
+	free_arp_scan(scan);
+	return NULL;
+}
+
 nmap_r **parse_arp_scan(FILE *fd)
 {
 	char *line = NULL;

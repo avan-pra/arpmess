@@ -50,6 +50,7 @@ typedef struct arguments
 	/* number of packets sent per minute */
 	int ppm;
 	char *nmapflags;
+	char *filename; /* filename to load hosts list from */
 	unsigned int scanamount;	/* number of result in the scan */
 	uint8_t gateway_pa[IPV4_LEN];	/* gateway protocol (IPv4) addr */
 	uint8_t gateway_ha[ETH_ALEN];	/* gateway hardware addr */

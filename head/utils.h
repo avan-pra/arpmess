@@ -7,10 +7,13 @@
 int argparse(int argc, char **argv, struct arguments *arguments);
 
 /* network.c */
+void sort_scan(nmap_r **scan);
+void remove_scan_duplicate(nmap_r **scan);
 int get_gateway_ip(void);
 int get_network_interface(char ifacename[IF_NAMESIZE], uint8_t gateway_pa[IPV4_LEN]);
 int get_network_interface_addresses(struct arguments *arguments);
 nmap_r **nmapscan(struct arguments *arguments);
+nmap_r **add_scan_to_scan_list(nmap_r **scan, nmap_r* c_scan);
 nmap_r **parse_arp_scan(FILE *fd);
 void free_arp_scan(nmap_r **scan);
 
@@ -18,6 +21,7 @@ void free_arp_scan(nmap_r **scan);
 int ask_user_for_gateway();
 int ask_action();
 int ask_index_list(nmap_r **scan, char **buf);
+int ask_string(char *msg, char **buf);
 int change_ppm(struct arguments *arguments);
 
 /* utils.c */
@@ -31,6 +35,8 @@ void copy_ipv4(uint8_t dest[IPV4_LEN], const uint8_t src[IPV4_LEN]);
 void copy_mac(uint8_t dest[ETH_ALEN], const uint8_t src[ETH_ALEN]);
 int fill_vendor_from_manuf_file(nmap_r **scan);
 void PRINT_SCAN_LIST(nmap_r **scan);
+void dumpscan(nmap_r **scan);
+nmap_r **loadscan(char *filename, nmap_r **scan);
 int start_signal();
 int stop_signal();
 nmap_r *get_self_from_scan(nmap_r **scan);

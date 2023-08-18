@@ -97,6 +97,17 @@ static int interactivemode(nmap_r ***scan, struct arguments *arguments)
 		else if (action == ACTION_CHANGE_PPM) {
 			change_ppm(arguments);
 		}
+		else if (action == ACTION_DUMP_NETWORK) {
+			dumpscan(*scan);
+		}
+		else if (action == ACTION_LOAD_NETWORK) {
+			long long hostidx = ask_string("filename ?", &list);
+			if (hostidx == 1) // malloc error
+				goto err;
+			if (!(*scan = loadscan(list, *scan)) != 0)
+				goto err;
+			fill_vendor_from_manuf_file(*scan);
+		}
 		/* E */
 		else if (action == ACTION_EXIT)
 			break;
@@ -182,8 +193,14 @@ int main(int argc, char **argv)
 		goto err;//error no hardware addr or protocol address for specified interface
 
 	/* will only scan if no target are specified */
-	if (!(scan = nmapscan(&arguments))) 
-		goto err;
+	if (arguments.filename != NULL) {
+		if (!(scan = loadscan(arguments.filename, NULL)))
+			goto err;
+	}
+	else {
+		if (!(scan = nmapscan(&arguments)))
+			goto err;
+	}
 
 	if (fill_vendor_from_manuf_file(scan) != 0)
 		goto err;
@@ -226,6 +243,8 @@ int main(int argc, char **argv)
 
 	if (arguments.nmapflags != NULL)
 		free(arguments.nmapflags);
+	if (arguments.filename != NULL)
+		free(arguments.filename);
 	free_arp_scan(scan);
 	TELLEXITING();
 	return 0;
